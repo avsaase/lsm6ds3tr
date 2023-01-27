@@ -1,0 +1,42 @@
+default:
+  image: $CI_REGISTRY_IMAGE:latest
+
+stages:
+  - docker
+  - check
+  - build
+
+docker-lint:
+  stage: docker
+  image: hadolint/hadolint:v2.9.3-debian
+  script:
+    - hadolint Dockerfile
+
+docker-image:
+  stage: docker
+  image: docker:20.10.14
+  needs: ["docker-lint"]
+  dependencies: []
+  services:
+    - docker:dind
+  tags:
+    - docker
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build . --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --tag $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+check:
+  stage: check
+  dependencies: []
+  script:
+    - ci/jobs/check
+
+build:
+  stage: build
+  dependencies: []
+  script:
+    - ci/jobs/build

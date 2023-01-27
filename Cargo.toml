@@ -1,6 +1,6 @@
 [package]
 name = "lsm6ds3tr"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 description = "LSM6DS3TR 6-axis (DOF) IMU accelerometer & gyroscope rust driver library"
 authors = ["Marcin Czekajło <mtczekajlo@gmail.com>"]
@@ -11,3 +11,9 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+embedded-hal = "0.2.7"
+defmt = { version = "0.3.2", optional = true }
+
+[features]
+default = []
+defmt = ["dep:defmt"]

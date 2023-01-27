@@ -1,9 +1,9 @@
 # LSM6DS3TR-C Rust
 
-LSM6DS3TR 6-axis (DOF) IMU accelerometer & gyroscope rust driver library.
+[![pipeline](https://gitlab.com/mtczekajlo/lsm6ds3tr-rs/badges/master/pipeline.svg)](https://gitlab.com/mtczekajlo/lsm6ds3tr-rs/-/pipelines/latest)
+[![crates](https://img.shields.io/crates/v/lsm6ds3tr.svg)](https://crates.io/crates/lsm6ds3tr)
+[![docs](https://docs.rs/lsm6ds3tr/badge.svg)](https://docs.rs/lsm6ds3tr/latest/lsm6ds3tr/)
 
-<https://gitlab.com/mtczekajlo/lsm6ds3tr-rs>
+LSM6DS3TR-C 6-axis (DOF) IMU accelerometer & gyroscope rust driver library.
 
-<https://crates.io/crates/lsm6ds3tr>
-
-_placeholder repository for future implementation_
+_inspired by [LSM9DS1 rust driver](https://github.com/lonesometraveler/lsm9ds1)._
