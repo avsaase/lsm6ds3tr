@@ -43,7 +43,7 @@ where
     }
 
     pub fn read_accel_raw(&mut self) -> Result<XYZ<i16>, I::Error> {
-        self.read_sensor_raw(Register::OUT_X_L_XL.addr())
+        self.read_sensor_raw(Register::OUTX_L_XL.addr())
     }
 
     pub fn read_accel(&mut self) -> Result<XYZ<f32>, I::Error> {
@@ -57,7 +57,7 @@ where
     }
 
     pub fn read_gyro_raw(&mut self) -> Result<XYZ<i16>, I::Error> {
-        self.read_sensor_raw(Register::OUT_X_L_G.addr())
+        self.read_sensor_raw(Register::OUTX_L_G.addr())
     }
 
     pub fn read_gyro(&mut self) -> Result<XYZ<f32>, I::Error> {
