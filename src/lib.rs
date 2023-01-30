@@ -38,8 +38,18 @@ where
         }
     }
 
-    pub fn reachable(&mut self) -> Result<bool, I::Error> {
+    pub fn is_reachable(&mut self) -> Result<bool, I::Error> {
         Ok(self.read_register(Register::WHO_AM_I.addr())? == consts::LSM6DS3TR_ID)
+    }
+
+    pub fn begin_accel(&mut self) -> Result<(), I::Error> {
+        self.write_register(Register::CTRL1_XL.addr(), self.settings.accel.ctrl1_xl())?;
+        Ok(())
+    }
+
+    pub fn begin_gyro(&mut self) -> Result<(), I::Error> {
+        self.write_register(Register::CTRL2_G.addr(), self.settings.gyro.ctrl2_g())?;
+        Ok(())
     }
 
     pub fn read_accel_raw(&mut self) -> Result<XYZ<i16>, I::Error> {
@@ -68,6 +78,19 @@ where
             y: xyz.y as f32 * sensitivity,
             z: xyz.z as f32 * sensitivity,
         })
+    }
+
+    pub fn read_temp_raw(&mut self) -> Result<i16, I::Error> {
+        let mut bytes = [0u8; 2];
+        self.interface
+            .read(Register::OUT_TEMP_L.addr(), &mut bytes)?;
+        let temp: i16 = (bytes[1] as i16) << 8 | bytes[0] as i16;
+        Ok(temp)
+    }
+
+    pub fn read_temp(&mut self) -> Result<f32, I::Error> {
+        let temp = self.read_temp_raw()?;
+        Ok(temp as f32 / consts::TEMP_SCALE + consts::TEMP_BIAS)
     }
 
     fn read_sensor_raw(&mut self, addr: u8) -> Result<XYZ<i16>, I::Error> {
