@@ -1,6 +1,6 @@
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy)]
-pub enum Register {
+pub enum RegisterAddress {
     // RESERVED = 0x00,
     /// Embedded functions configuration register
     FUNC_CFG_ACCESS = 0x01,
@@ -19,6 +19,7 @@ pub enum Register {
     FIFO_CTRL4 = 0x09,
     /// FIFO configuration registers
     FIFO_CTRL5 = 0x0A,
+    /// (no comment)
     DRDY_PULSE_CFG_G = 0x0B,
     // RESERVED = 0x0C,
     /// INT1 pin control
@@ -172,7 +173,9 @@ pub enum Register {
     MD1_CFG = 0x5E,
     /// Interrupt registers
     MD2_CFG = 0x5F,
+    /// (no comment)
     MASTER_CMD_CODE = 0x60,
+    /// (no comment)
     SENS_SYNC_SPI_ERROR_CODE = 0x61,
     // RESERVED = [0x62..0x65],
     /// External magnetometer raw data output registers
@@ -197,8 +200,13 @@ pub enum Register {
     // RESERVED = [0x76..0x7F],
 }
 
-impl Register {
-    pub fn addr(self) -> u8 {
+impl RegisterAddress {
+    pub fn address(self) -> u8 {
         self as u8
     }
+}
+
+pub struct RegisterConfig {
+    pub address: u8,
+    pub value: u8,
 }

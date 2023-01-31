@@ -1,0 +1,25 @@
+pub mod addresses;
+pub mod ctrl1_xl;
+pub mod ctrl2_g;
+pub mod free_fall;
+pub mod int1_ctrl;
+pub mod int2_ctrl;
+pub mod md1_cfg;
+pub mod md2_cfg;
+pub mod tap_cfg;
+pub mod tap_src;
+pub mod wake_up_src;
+pub mod wake_up_ths;
+
+pub use addresses::*;
+pub use ctrl1_xl::*;
+pub use ctrl2_g::*;
+pub use free_fall::*;
+pub use int1_ctrl::*;
+pub use int2_ctrl::*;
+pub use md1_cfg::*;
+pub use md2_cfg::*;
+pub use tap_cfg::*;
+pub use tap_src::*;
+pub use wake_up_src::*;
+pub use wake_up_ths::*;

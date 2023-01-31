@@ -1,10 +1,7 @@
 use core::fmt::{Display, Result};
 
 #[derive(Default)]
-pub struct XYZ<T>
-where
-    T: Display,
-{
+pub struct XYZ<T> {
     pub x: T,
     pub y: T,
     pub z: T,
@@ -22,7 +19,7 @@ where
 #[cfg(feature = "defmt")]
 impl<T> defmt::Format for XYZ<T>
 where
-    T: Display + defmt::Format,
+    T: defmt::Format,
 {
     fn format(&self, f: defmt::Formatter) {
         defmt::write!(f, "X:{} Y:{} Z:{}", self.x, self.y, self.z)
