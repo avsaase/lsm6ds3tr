@@ -1,4 +1,5 @@
-use crate::{registers::ctrl1_xl::*, RegisterConfig};
+use crate::registers::Ctrl1Xl;
+use crate::{AccelODR, AccelScale, RegisterConfig};
 
 #[derive(Default)]
 pub struct AccelSettings {
@@ -9,6 +10,12 @@ pub struct AccelSettings {
 impl AccelSettings {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn new_simple() -> Self {
+        Self::new()
+            .with_sample_rate(AccelODR::_416Hz)
+            .with_scale(AccelScale::_2G)
     }
 
     pub fn with_sample_rate(mut self, sample_rate: AccelODR) -> Self {

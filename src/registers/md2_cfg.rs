@@ -1,6 +1,7 @@
 //! Function routing on INT2 register (r/w).
 
 use crate::RegisterAddress;
+use crate::RegisterConfig;
 
 /// Function routing on INT2 register (r/w).
 #[derive(Default)]
@@ -37,11 +38,11 @@ pub struct Md2Cfg {
 }
 
 impl Md2Cfg {
-    pub fn address(self) -> u8 {
+    pub fn address(&self) -> u8 {
         RegisterAddress::MD2_CFG.address()
     }
 
-    pub fn value(self) -> u8 {
+    pub fn value(&self) -> u8 {
         let mut value: u8 = 0;
 
         if self.inactivity_event {
@@ -77,5 +78,12 @@ impl Md2Cfg {
         }
 
         value
+    }
+
+    pub fn config(&self) -> RegisterConfig {
+        RegisterConfig {
+            address: self.address(),
+            value: self.value(),
+        }
     }
 }

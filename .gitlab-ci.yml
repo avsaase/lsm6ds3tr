@@ -35,6 +35,12 @@ check:
   script:
     - ci/jobs/check
 
+doc:
+  stage: check
+  dependencies: []
+  script:
+    - ci/jobs/doc
+
 build:
   stage: build
   dependencies: []

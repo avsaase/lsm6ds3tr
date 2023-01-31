@@ -1,7 +1,7 @@
 pub mod accel;
 pub mod gyro;
-pub mod interrupts;
+pub mod irq;
 
 pub use accel::*;
 pub use gyro::*;
-pub use interrupts::*;
+pub use irq::*;

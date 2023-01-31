@@ -1,8 +1,10 @@
 //! Enables interrupt and inactivity functions, configuration of filtering and tap recognition functions (r/w).
 
 use crate::RegisterAddress;
+use crate::RegisterConfig;
 
 /// Enables interrupt and inactivity functions, configuration of filtering and tap recognition functions (r/w).
+#[derive(Default)]
 pub struct TapCfg {
     /// Enable basic interrupts (6D/4D, free-fall, wake-up, tap, inactivity). Default 0.
     /// (0: interrupt disabled; 1: interrupt enabled)
@@ -60,6 +62,13 @@ impl TapCfg {
         }
 
         value
+    }
+
+    pub fn config(&self) -> RegisterConfig {
+        RegisterConfig {
+            address: self.address(),
+            value: self.value(),
+        }
     }
 }
 

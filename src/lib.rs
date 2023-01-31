@@ -7,20 +7,19 @@ pub mod measurements;
 pub mod registers;
 pub mod settings;
 
-pub use crate::registers::RegisterConfig;
-use crate::registers::{
-    {AccelODR, AccelScale}, {GyroODR, GyroScale},
+use consts::*;
+use interface::Interface;
+use measurements::XYZ;
+use registers::{
+    AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterConfig,
 };
-pub use consts::*;
-pub use interface::Interface;
-pub use measurements::XYZ;
-pub use settings::GyroSettings;
-pub use {registers::RegisterAddress, settings::AccelSettings};
+use settings::{AccelSettings, GyroSettings, IrqSettings};
 
 #[derive(Default)]
 pub struct LsmSettings {
     accel: AccelSettings,
     gyro: GyroSettings,
+    irq: IrqSettings,
 }
 
 pub struct LSM6DS3TR<I>
@@ -42,31 +41,53 @@ where
         }
     }
 
-    pub fn new_enabled(interface: I) -> Self {
-        Self {
-            interface,
-            settings: LsmSettings {
-                accel: AccelSettings::new()
-                    .with_sample_rate(AccelODR::_833Hz)
-                    .with_scale(AccelScale::_2G),
-                gyro: GyroSettings::new()
-                    .with_sample_rate(GyroODR::_833Hz)
-                    .with_scale(GyroScale::_250DPS),
-            },
-        }
+    pub fn with_settings(mut self, settings: LsmSettings) -> Self {
+        self.settings = settings;
+        self
+    }
+
+    pub fn with_accel(mut self, accel_settings: AccelSettings) -> Self {
+        self.settings.accel = accel_settings;
+        self
+    }
+
+    pub fn with_gyro(mut self, gyro_settings: GyroSettings) -> Self {
+        self.settings.gyro = gyro_settings;
+        self
+    }
+
+    pub fn with_irq(mut self, irq_settings: IrqSettings) -> Self {
+        self.settings.irq = irq_settings;
+        self
     }
 
     pub fn is_reachable(&mut self) -> Result<bool, I::Error> {
         Ok(self.read_register(RegisterAddress::WHO_AM_I.address())? == LSM6DS3TR_ID)
     }
 
-    pub fn begin_accel(&mut self) -> Result<(), I::Error> {
+    pub fn software_reset(&mut self) -> Result<(), I::Error> {
+        let ctrl3_c = Ctrl3C {
+            software_reset: true,
+            ..Default::default()
+        };
+        self.write_register_config(ctrl3_c.config())?;
+        Ok(())
+    }
+
+    pub fn setup_accel(&mut self) -> Result<(), I::Error> {
         self.write_register_config(self.settings.accel.config())?;
         Ok(())
     }
 
-    pub fn begin_gyro(&mut self) -> Result<(), I::Error> {
+    pub fn setup_gyro(&mut self) -> Result<(), I::Error> {
         self.write_register_config(self.settings.gyro.config())?;
+        Ok(())
+    }
+
+    pub fn setup_irqs(&mut self) -> Result<(), I::Error> {
+        for config in self.settings.irq.configs() {
+            self.write_register_config(config)?;
+        }
         Ok(())
     }
 

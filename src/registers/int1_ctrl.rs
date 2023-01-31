@@ -1,6 +1,7 @@
 //! INT1 pad control register (r/w).
 
 use crate::RegisterAddress;
+use crate::RegisterConfig;
 
 /// INT1 pad control register (r/w).
 /// Each bit in this register enables a signal to be carried through INT1. The pad’s output will supply the OR combination of the selected signals.
@@ -33,11 +34,11 @@ pub struct Int1Ctrl {
 }
 
 impl Int1Ctrl {
-    pub fn address(self) -> u8 {
+    pub fn address(&self) -> u8 {
         RegisterAddress::INT1_CTRL.address()
     }
 
-    pub fn value(self) -> u8 {
+    pub fn value(&self) -> u8 {
         let mut value: u8 = 0;
 
         if self.pedometer_step_recognition {
@@ -73,5 +74,12 @@ impl Int1Ctrl {
         }
 
         value
+    }
+
+    pub fn config(&self) -> RegisterConfig {
+        RegisterConfig {
+            address: self.address(),
+            value: self.value(),
+        }
     }
 }

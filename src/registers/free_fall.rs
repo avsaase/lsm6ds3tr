@@ -1,6 +1,6 @@
 //! Free-fall function duration setting register (r/w).
 
-use crate::RegisterAddress;
+use crate::{RegisterAddress, RegisterConfig};
 
 /// Free-fall function duration setting register (r/w).
 #[derive(Default)]
@@ -14,18 +14,25 @@ pub struct FreeFall {
 }
 
 impl FreeFall {
-    pub fn address(self) -> u8 {
+    pub fn address(&self) -> u8 {
         RegisterAddress::FREE_FALL.address()
     }
 
-    pub fn value(self) -> u8 {
+    pub fn value(&self) -> u8 {
         (self.duration_event & 0b11111) << 3 | self.threshold.value()
+    }
+
+    pub fn config(&self) -> RegisterConfig {
+        RegisterConfig {
+            address: self.address(),
+            value: self.value(),
+        }
     }
 }
 
 #[allow(non_camel_case_types)]
 #[repr(u8)]
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub enum FreeFallThreshold {
     #[default]
     _156_mg = 0b000,

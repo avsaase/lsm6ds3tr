@@ -1,6 +1,6 @@
 //! Single and double-tap function threshold register (r/w).
 
-use crate::RegisterAddress;
+use crate::{RegisterAddress, RegisterConfig};
 
 /// Single and double-tap function threshold register (r/w).
 pub struct WakeUpThs {
@@ -28,5 +28,12 @@ impl WakeUpThs {
         value |= self.wake_up_threshold & 0b111111;
 
         value
+    }
+
+    pub fn config(&self) -> RegisterConfig {
+        RegisterConfig {
+            address: self.address(),
+            value: self.value(),
+        }
     }
 }
