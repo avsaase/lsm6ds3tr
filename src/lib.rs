@@ -2,14 +2,14 @@
 #![allow(dead_code)]
 
 pub mod consts;
+pub mod data;
 pub mod interface;
-pub mod measurements;
 pub mod registers;
 pub mod settings;
 
 use consts::*;
+use data::XYZ;
 use interface::Interface;
-use measurements::XYZ;
 use registers::{
     AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterConfig,
 };

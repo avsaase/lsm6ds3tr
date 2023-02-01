@@ -3,13 +3,14 @@
 use crate::{RegisterAddress, RegisterConfig};
 
 /// Single and double-tap function threshold register (r/w).
+#[derive(Default)]
 pub struct WakeUpThs {
     /// Single/double-tap event enable. Default: 0
     /// (0: only single-tap event enabled;
     /// 1: both single and double-tap events enabled)
-    pub single_double_tap_enabled: bool,
+    pub single_and_double_tap_enabled: bool,
     /// Threshold for wakeup. Default value: 000000
-    /// 1 LSb corresponds to FS_XL/26
+    /// 1 LSb corresponds to FS_XL/2^6
     pub wake_up_threshold: u8,
 }
 
@@ -21,7 +22,7 @@ impl WakeUpThs {
     pub fn value(&self) -> u8 {
         let mut value: u8 = 0;
 
-        if self.single_double_tap_enabled {
+        if self.single_and_double_tap_enabled {
             value |= 1 << 7;
         }
 

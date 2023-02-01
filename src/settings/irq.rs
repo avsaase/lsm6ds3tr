@@ -1,5 +1,9 @@
-use crate::registers::{
-    FreeFall, Int1Ctrl, Int2Ctrl, Md1Cfg, Md2Cfg, RegisterConfig, TapCfg, WakeUpDur,
+use crate::{
+    data::XYZ,
+    registers::{
+        FreeFall, Int1Ctrl, Int2Ctrl, IntDur2, Md1Cfg, Md2Cfg, RegisterConfig, TapCfg, TapThs6d,
+        WakeUpDur, WakeUpThs,
+    },
 };
 
 pub use crate::registers::FreeFallThreshold;
@@ -16,6 +20,7 @@ pub enum InterruptRoute {
 #[derive(Default, Clone, Copy)]
 pub enum TapRecognitionMode {
     #[default]
+    None,
     Single,
     Double,
     Both,
@@ -31,22 +36,30 @@ pub struct FreeFallIrqSettings {
 #[derive(Default)]
 pub struct WakeUpIrqSettings {
     pub interrupt_route: InterruptRoute,
+    pub threshold: u8,
 }
 
 #[derive(Default)]
 pub struct OrientationDetectionIrqSettings {
     pub interrupt_route: InterruptRoute,
+    // TODO
 }
 
 #[derive(Default)]
 pub struct TapIrqSettings {
     pub interrupt_route: InterruptRoute,
     pub recognition_mode: TapRecognitionMode,
+    pub direction_enable: XYZ<bool>,
+    pub threshold: u8,
+    pub shock_samples: u8,
+    pub quiet_samples: u8,
+    pub duration_samples: u8,
 }
 
 #[derive(Default)]
 pub struct ActivityIrqSettings {
     pub interrupt_route: InterruptRoute,
+    // TODO
 }
 
 #[derive(Default)]
@@ -66,8 +79,11 @@ struct IrqRegisters {
     md1_cfg: Md1Cfg,
     md2_cfg: Md2Cfg,
     tap_cfg: TapCfg,
+    tap_ths_6d: TapThs6d,
     free_fall: FreeFall,
     wake_up_dur: WakeUpDur,
+    wake_up_ths: WakeUpThs,
+    int_dur2: IntDur2,
 }
 
 impl IrqSettings {
@@ -91,11 +107,30 @@ impl IrqSettings {
         self.update_registers();
     }
 
-    pub fn enable_tap_irq(&mut self, tap_recognition_mode: TapRecognitionMode, latched_irq: bool) {
+    pub fn enable_wake_up_irq(
+        &mut self,
+        threshold: u8,
+        interrupt_route: InterruptRoute,
+        latched_irq: bool,
+    ) {
+        self.enable_irqs(latched_irq);
+
+        self.wake_up.interrupt_route = interrupt_route;
+        self.wake_up.threshold = threshold;
+
+        self.update_registers();
+    }
+
+    pub fn enable_tap_irq(
+        &mut self,
+        tap_recognition_mode: TapRecognitionMode,
+        tap_direction_enable: XYZ<bool>,
+        latched_irq: bool,
+    ) {
         self.enable_irqs(latched_irq);
 
         self.tap.recognition_mode = tap_recognition_mode;
-        // TODO continue here
+        self.tap.direction_enable = tap_direction_enable;
 
         self.update_registers();
     }
@@ -103,26 +138,34 @@ impl IrqSettings {
     pub fn enable_irqs(&mut self, latched_irq: bool) {
         self.registers.tap_cfg.enable_basic_interrupts = true;
         self.registers.tap_cfg.latched_interrupt = latched_irq;
+
+        self.update_registers();
     }
 
     pub fn disable_irqs(&mut self) {
         self.registers.tap_cfg.enable_basic_interrupts = false;
+
+        self.update_registers();
     }
 
-    pub fn configs(&self) -> [RegisterConfig; 7] {
+    pub fn configs(&self) -> [RegisterConfig; 10] {
         [
             self.registers.int1_ctrl.config(),
             self.registers.int2_ctrl.config(),
+            self.registers.int_dur2.config(),
             self.registers.md1_cfg.config(),
             self.registers.md2_cfg.config(),
             self.registers.tap_cfg.config(),
+            self.registers.tap_ths_6d.config(),
             self.registers.free_fall.config(),
             self.registers.wake_up_dur.config(),
+            self.registers.wake_up_ths.config(),
         ]
     }
 
     fn update_registers(&mut self) {
         self.update_free_fall_registers();
+        self.update_wake_up_registers();
         self.update_tap_registers();
     }
 
@@ -137,11 +180,35 @@ impl IrqSettings {
             InterruptRoute::Both => (true, true),
         };
         self.registers.free_fall.threshold = self.free_fall.threshold;
+        self.registers.wake_up_dur.free_fall_duration_event =
+            ((self.free_fall.threshold as u8) >> 5) & 0b1;
         self.registers.free_fall.duration_event = self.free_fall.duration_samples;
+    }
+
+    fn update_wake_up_registers(&mut self) {
+        (
+            self.registers.md1_cfg.wake_up_event,
+            self.registers.md2_cfg.wake_up_event,
+        ) = match self.tap.interrupt_route {
+            InterruptRoute::None => (false, false),
+            InterruptRoute::Int1 => (true, false),
+            InterruptRoute::Int2 => (false, true),
+            InterruptRoute::Both => (true, true),
+        };
+        self.registers.wake_up_ths.wake_up_threshold = self.wake_up.threshold;
     }
 
     fn update_tap_registers(&mut self) {
         match self.tap.recognition_mode {
+            TapRecognitionMode::None | TapRecognitionMode::Single => {
+                self.registers.wake_up_ths.single_and_double_tap_enabled = false
+            }
+            TapRecognitionMode::Double | TapRecognitionMode::Both => {
+                self.registers.wake_up_ths.single_and_double_tap_enabled = true
+            }
+        }
+        match self.tap.recognition_mode {
+            TapRecognitionMode::None => (),
             TapRecognitionMode::Single => self.update_single_tap_registers(),
             TapRecognitionMode::Double => self.update_double_tap_registers(),
             TapRecognitionMode::Both => {
@@ -149,6 +216,13 @@ impl IrqSettings {
                 self.update_double_tap_registers();
             }
         };
+        self.registers.tap_cfg.enable_x_direction_tap_recognition = self.tap.direction_enable.x;
+        self.registers.tap_cfg.enable_y_direction_tap_recognition = self.tap.direction_enable.y;
+        self.registers.tap_cfg.enable_z_direction_tap_recognition = self.tap.direction_enable.z;
+        self.registers.tap_ths_6d.tap_threshold = self.tap.threshold;
+        self.registers.int_dur2.duration = self.tap.duration_samples;
+        self.registers.int_dur2.quiet = self.tap.quiet_samples;
+        self.registers.int_dur2.shock = self.tap.shock_samples;
     }
 
     fn update_single_tap_registers(&mut self) {

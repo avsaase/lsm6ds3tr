@@ -27,7 +27,7 @@ pub struct Md2Cfg {
     pub double_tap_event: bool,
     /// Routing of 6D event on INT2. Default value: 0
     /// (0: routing of 6D event on INT2 disabled; 1: routing of 6D event on INT2 enabled)
-    pub d6d_event: bool,
+    pub six_degrees_event: bool,
     /// Routing of tilt event on INT2. Default value: 0
     /// (0: routing of tilt event on INT2 disabled; 1: routing of tilt event on INT2 enabled)
     pub tilt_event: bool,
@@ -65,7 +65,7 @@ impl Md2Cfg {
             value |= 1 << 3;
         }
 
-        if self.d6d_event {
+        if self.six_degrees_event {
             value |= 1 << 2;
         }
 
