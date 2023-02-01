@@ -1,4 +1,6 @@
+pub mod i2c;
 pub mod spi;
+pub use self::i2c::I2cInterface;
 pub use self::spi::SpiInterface;
 
 pub trait Interface {
