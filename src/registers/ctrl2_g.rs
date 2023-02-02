@@ -50,11 +50,11 @@ impl GyroScale {
     pub fn sensitivity(self) -> f32 {
         use GyroScale::*;
         match self {
-            _125DPS => 0.04375,
-            _250DPS => 0.0875,
-            _500DPS => 0.0175,
-            _1000DPS => 0.035,
-            _2000DPS => 0.07,
+            _125DPS => 0.004_375,
+            _250DPS => 0.008_750,
+            _500DPS => 0.017_500,
+            _1000DPS => 0.035_000,
+            _2000DPS => 0.070_000,
         }
     }
 }
