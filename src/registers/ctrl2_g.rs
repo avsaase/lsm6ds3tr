@@ -5,6 +5,8 @@
 use crate::registers::RegisterConfig;
 use crate::RegisterAddress;
 
+use super::RegisterValue;
+
 #[derive(Default)]
 /// Angular rate sensor control register 2 (r/w).
 pub struct Ctrl2G {
@@ -21,7 +23,7 @@ impl Ctrl2G {
     }
 
     pub fn value(&self) -> u8 {
-        self.sample_rate.value() | self.scale.value()
+        self.sample_rate.shifted() | self.scale.shifted()
     }
 
     pub fn config(&self) -> RegisterConfig {
@@ -43,10 +45,6 @@ pub enum GyroScale {
 }
 
 impl GyroScale {
-    pub fn value(self) -> u8 {
-        (self as u8) << 1
-    }
-
     pub fn sensitivity(self) -> f32 {
         use GyroScale::*;
         match self {
@@ -56,6 +54,12 @@ impl GyroScale {
             _1000DPS => 0.035_000,
             _2000DPS => 0.070_000,
         }
+    }
+}
+
+impl RegisterValue for GyroScale {
+    fn shifted(&self) -> u8 {
+        (*self as u8) << 1
     }
 }
 
@@ -87,8 +91,8 @@ pub enum GyroODR {
     // Not allowed = [0b1011..0b1111]
 }
 
-impl GyroODR {
-    pub fn value(self) -> u8 {
-        (self as u8) << 4
+impl RegisterValue for GyroODR {
+    fn shifted(&self) -> u8 {
+        (*self as u8) << 4
     }
 }

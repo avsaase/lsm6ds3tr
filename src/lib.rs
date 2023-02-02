@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(test), no_std)]
 #![allow(dead_code)]
 
 pub mod consts;
@@ -11,7 +11,8 @@ use consts::*;
 use data::XYZ;
 use interface::Interface;
 use registers::{
-    AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterConfig,
+    AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterBits,
+    RegisterConfig, RegisterValue,
 };
 use settings::{AccelSettings, GyroSettings, IrqSettings};
 
@@ -67,7 +68,7 @@ where
 
     pub fn software_reset(&mut self) -> Result<(), I::Error> {
         let ctrl3_c = Ctrl3C {
-            software_reset: true,
+            software_reset: RegisterBits::new(1),
             ..Default::default()
         };
         self.write_register_config(ctrl3_c.config())?;

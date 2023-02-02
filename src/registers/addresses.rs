@@ -210,3 +210,315 @@ pub struct RegisterConfig {
     pub address: u8,
     pub value: u8,
 }
+
+#[derive(Default)]
+pub struct RegisterBits<const BITS_NUM: u8, const BITS_POS: u8> {
+    value: u8,
+}
+
+impl<const BITS_NUM: u8, const BITS_POS: u8> RegisterBits<BITS_NUM, BITS_POS> {
+    pub fn new(value: u8) -> Self {
+        Self::from(value)
+    }
+
+    pub fn new_from_reg(value: u8) -> Self {
+        Self::from((value >> BITS_POS) & Self::bit_mask())
+    }
+
+    pub fn from_reg(&mut self, value: u8) {
+        self.value = (value >> BITS_POS) & Self::bit_mask();
+    }
+
+    pub fn bit_mask() -> u8 {
+        (1 << BITS_NUM) - 1
+    }
+
+    pub fn bit_shifted_mask() -> u8 {
+        Self::bit_mask() << BITS_POS
+    }
+}
+
+pub trait RegisterValue {
+    fn shifted(&self) -> u8;
+}
+
+impl<const BITS_NUM: u8, const BITS_POS: u8> RegisterValue for RegisterBits<BITS_NUM, BITS_POS> {
+    fn shifted(&self) -> u8 {
+        (self.value & Self::bit_mask()) << BITS_POS
+    }
+}
+
+impl<const BITS_NUM: u8, const BITS_POS: u8> From<u8> for RegisterBits<BITS_NUM, BITS_POS> {
+    fn from(value: u8) -> Self {
+        Self {
+            value: value & Self::bit_mask(),
+        }
+    }
+}
+
+impl<const BITS_NUM: u8, const BITS_POS: u8> From<bool> for RegisterBits<BITS_NUM, BITS_POS> {
+    fn from(value: bool) -> Self {
+        Self::from(value as u8)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{RegisterBits, RegisterValue};
+
+    #[test]
+    fn new_1_0() {
+        const BITS: u8 = 1;
+        const POS: u8 = 0;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b1);
+    }
+
+    #[test]
+    fn new_1_1() {
+        const BITS: u8 = 1;
+        const POS: u8 = 1;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b1);
+    }
+
+    #[test]
+    fn new_1_2() {
+        const BITS: u8 = 1;
+        const POS: u8 = 2;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b1);
+    }
+
+    #[test]
+    fn new_2_0() {
+        const BITS: u8 = 2;
+        const POS: u8 = 0;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b11);
+    }
+
+    #[test]
+    fn new_2_1() {
+        const BITS: u8 = 2;
+        const POS: u8 = 1;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b11);
+    }
+
+    #[test]
+    fn new_2_2() {
+        const BITS: u8 = 2;
+        const POS: u8 = 2;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b11);
+    }
+
+    #[test]
+    fn shifted_1_0() {
+        const BITS: u8 = 1;
+        const POS: u8 = 0;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b1);
+        assert_eq!(rb.shifted(), 0b1);
+    }
+
+    #[test]
+    fn shifted_1_1() {
+        const BITS: u8 = 1;
+        const POS: u8 = 1;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b1);
+        assert_eq!(rb.shifted(), 0b10);
+    }
+
+    #[test]
+    fn shifted_1_2() {
+        const BITS: u8 = 1;
+        const POS: u8 = 2;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b1);
+        assert_eq!(rb.shifted(), 0b100);
+    }
+
+    #[test]
+    fn shifted_2_1() {
+        const BITS: u8 = 2;
+        const POS: u8 = 1;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b110);
+    }
+
+    #[test]
+    fn shifted_2_2() {
+        const BITS: u8 = 2;
+        const POS: u8 = 2;
+        let rb = RegisterBits::<BITS, POS>::new(0b11111111);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b1100);
+    }
+
+    #[test]
+    fn new_from_reg_1_0() {
+        const BITS: u8 = 1;
+        const POS: u8 = 0;
+        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        assert_eq!(rb.value, 0b1);
+        assert_eq!(rb.shifted(), 0b1);
+    }
+
+    #[test]
+    fn new_from_reg_1_1() {
+        const BITS: u8 = 1;
+        const POS: u8 = 1;
+        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        assert_eq!(rb.value, 0b1);
+        assert_eq!(rb.shifted(), 0b10);
+    }
+
+    #[test]
+    fn new_from_reg_2_0() {
+        const BITS: u8 = 2;
+        const POS: u8 = 0;
+        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b11);
+    }
+
+    #[test]
+    fn new_from_reg_2_1() {
+        const BITS: u8 = 2;
+        const POS: u8 = 1;
+        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b110);
+    }
+
+    #[test]
+    fn new_from_reg_2_2() {
+        const BITS: u8 = 2;
+        const POS: u8 = 2;
+        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b1100);
+    }
+
+    #[test]
+    fn from_reg_1_0() {
+        const BITS: u8 = 1;
+        const POS: u8 = 0;
+        let mut rb = RegisterBits::<BITS, POS>::default();
+        let reg: u8 = 0b11111111;
+        rb.from_reg(reg);
+        assert_eq!(rb.value, 0b1);
+        assert_eq!(rb.shifted(), 0b1);
+    }
+
+    #[test]
+    fn from_reg_1_1() {
+        const BITS: u8 = 1;
+        const POS: u8 = 1;
+        let mut rb = RegisterBits::<BITS, POS>::default();
+        let reg: u8 = 0b11111111;
+        rb.from_reg(reg);
+        assert_eq!(rb.value, 0b1);
+        assert_eq!(rb.shifted(), 0b10);
+    }
+
+    #[test]
+    fn from_reg_2_0() {
+        const BITS: u8 = 2;
+        const POS: u8 = 0;
+        let mut rb = RegisterBits::<BITS, POS>::default();
+        let reg: u8 = 0b11111111;
+        rb.from_reg(reg);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b11);
+    }
+
+    #[test]
+    fn from_reg_2_1() {
+        const BITS: u8 = 2;
+        const POS: u8 = 1;
+        let mut rb = RegisterBits::<BITS, POS>::default();
+        let reg: u8 = 0b11111111;
+        rb.from_reg(reg);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b110);
+    }
+
+    #[test]
+    fn from_reg_2_2() {
+        const BITS: u8 = 2;
+        const POS: u8 = 2;
+        let mut rb = RegisterBits::<BITS, POS>::default();
+        let reg: u8 = 0b11111111;
+        rb.from_reg(reg);
+        assert_eq!(rb.value, 0b11);
+        assert_eq!(rb.shifted(), 0b1100);
+    }
+
+    #[test]
+    fn bit_mask_1_0() {
+        const BITS: u8 = 1;
+        const POS: u8 = 0;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_mask(), 0b1);
+    }
+
+    #[test]
+    fn bit_mask_2_0() {
+        const BITS: u8 = 2;
+        const POS: u8 = 0;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_mask(), 0b11);
+    }
+
+    #[test]
+    fn bit_mask_3_0() {
+        const BITS: u8 = 3;
+        const POS: u8 = 0;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_mask(), 0b111);
+    }
+
+    #[test]
+    fn bit_shifted_mask_1_0() {
+        const BITS: u8 = 1;
+        const POS: u8 = 0;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_shifted_mask(), 0b1);
+    }
+
+    #[test]
+    fn bit_shifted_mask_1_1() {
+        const BITS: u8 = 1;
+        const POS: u8 = 1;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_shifted_mask(), 0b10);
+    }
+
+    #[test]
+    fn bit_shifted_mask_2_0() {
+        const BITS: u8 = 2;
+        const POS: u8 = 0;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_shifted_mask(), 0b11);
+    }
+
+    #[test]
+    fn bit_shifted_mask_2_1() {
+        const BITS: u8 = 2;
+        const POS: u8 = 1;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_shifted_mask(), 0b110);
+    }
+
+    #[test]
+    fn bit_shifted_mask_3_0() {
+        const BITS: u8 = 3;
+        const POS: u8 = 0;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_shifted_mask(), 0b111);
+    }
+
+    #[test]
+    fn bit_shifted_mask_3_1() {
+        const BITS: u8 = 3;
+        const POS: u8 = 1;
+        assert_eq!(RegisterBits::<BITS, POS>::bit_shifted_mask(), 0b1110);
+    }
+}

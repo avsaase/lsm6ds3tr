@@ -1,6 +1,6 @@
 //! Free-fall, wakeup, timestamp and sleep mode functions duration setting register (r/w).
 
-use crate::{RegisterAddress, RegisterConfig};
+use crate::{RegisterAddress, RegisterBits, RegisterConfig, RegisterValue};
 
 /// Free-fall, wakeup, timestamp and sleep mode functions duration setting register (r/w).
 #[derive(Default)]
@@ -8,16 +8,16 @@ pub struct WakeUpDur {
     /// Free fall duration event. Default: 0
     /// For the complete configuration of the free-fall duration, refer to FF_DUR[4\:0] in FREE_FALL (5Dh) configuration.
     /// 1 LSB = 1 ODR_time
-    pub free_fall_duration_event: u8,
+    pub free_fall_duration_event: RegisterBits<1, 7>,
     /// Wake up duration event. Default: 00
     /// 1LSB = 1 ODR_time
-    pub wake_up_duration_event: u8,
+    pub wake_up_duration_event: RegisterBits<2, 5>,
     /// Timestamp register resolution setting. Default value: 0
     /// (0: 1LSB = 6.4 ms; 1: 1LSB = 25 μs)
-    pub timestamp_resolution: bool,
+    pub timestamp_resolution: RegisterBits<1, 4>,
     /// Duration to go in sleep mode. Default value: 0000 (this corresponds to 16 ODR)
     /// 1 LSB = 512 ODR
-    pub sleep_duration_event: u8,
+    pub sleep_duration_event: RegisterBits<4, 0>,
 }
 
 impl WakeUpDur {
@@ -26,19 +26,10 @@ impl WakeUpDur {
     }
 
     pub fn value(&self) -> u8 {
-        let mut value: u8 = 0;
-
-        value |= (self.free_fall_duration_event & 0b1) << 7;
-
-        value |= (self.wake_up_duration_event & 0b11) << 5;
-
-        if self.timestamp_resolution {
-            value |= 1 << 4;
-        }
-
-        value |= self.sleep_duration_event & 0b1111;
-
-        value
+        self.free_fall_duration_event.shifted()
+            | self.wake_up_duration_event.shifted()
+            | self.timestamp_resolution.shifted()
+            | self.sleep_duration_event.shifted()
     }
 
     pub fn config(&self) -> RegisterConfig {

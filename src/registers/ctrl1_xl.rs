@@ -2,8 +2,7 @@
 
 #![allow(non_camel_case_types)]
 
-use crate::registers::RegisterConfig;
-use crate::RegisterAddress;
+use crate::{RegisterAddress, RegisterBits, RegisterConfig, RegisterValue};
 
 /// Linear acceleration sensor control register 1 (r/w).
 #[derive(Default)]
@@ -14,10 +13,10 @@ pub struct Ctrl1Xl {
     /// (00: ±2 g; 01: ±16 g; 10: ±4 g; 11: ±8 g)
     pub scale: AccelScale,
     /// Accelerometer digital LPF (LPF1) bandwidth selection. For bandwidth selection refer to CTRL8_XL (17h).
-    pub low_pass_filter: u8, // TODO
+    pub low_pass_filter: RegisterBits<1, 6>, // TODO
     /// Accelerometer analog chain bandwidth selection (only for accelerometer ODR ≥ 1.67 kHz).
     /// (0: BW @ 1.5 kHz; 1: BW @ 400 Hz)
-    pub analog_chain_bandwidth: u8, // TODO
+    pub analog_chain_bandwidth: RegisterBits<1, 7>, // TODO
 }
 
 impl Ctrl1Xl {
@@ -26,7 +25,10 @@ impl Ctrl1Xl {
     }
 
     pub fn value(&self) -> u8 {
-        self.sample_rate.value() | self.scale.value()
+        self.sample_rate.shifted()
+            | self.scale.shifted()
+            | self.low_pass_filter.shifted()
+            | self.analog_chain_bandwidth.shifted()
     }
 
     pub fn config(&self) -> RegisterConfig {
@@ -47,10 +49,6 @@ pub enum AccelScale {
 }
 
 impl AccelScale {
-    pub fn value(self) -> u8 {
-        (self as u8) << 2
-    }
-
     pub fn sensitivity(self) -> f32 {
         use AccelScale::*;
         match self {
@@ -59,6 +57,12 @@ impl AccelScale {
             _8G => 0.000_244,
             _16G => 0.000_732,
         }
+    }
+}
+
+impl RegisterValue for AccelScale {
+    fn shifted(&self) -> u8 {
+        (*self as u8) << 2
     }
 }
 
@@ -92,8 +96,8 @@ pub enum AccelODR {
     // Not allowed = [0b1100..0b1111]
 }
 
-impl AccelODR {
-    pub fn value(self) -> u8 {
-        (self as u8) << 4
+impl RegisterValue for AccelODR {
+    fn shifted(&self) -> u8 {
+        (*self as u8) << 2
     }
 }

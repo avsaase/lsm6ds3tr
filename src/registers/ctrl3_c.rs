@@ -2,49 +2,48 @@
 
 #![allow(non_camel_case_types)]
 
-use crate::registers::RegisterConfig;
-use crate::RegisterAddress;
+use crate::{RegisterAddress, RegisterBits, RegisterConfig, RegisterValue};
 
 /// Control register 3 (r/w).
 pub struct Ctrl3C {
     /// Reboot memory content. Default value: 0
     /// (0: normal mode; 1: reboot memory content)
-    pub reboot_memory_content: bool,
+    pub reboot_memory_content: RegisterBits<1, 7>,
     /// Block Data Update. Default value: 0
     /// (0: continuous update; 1: output registers not updated until MSB and LSB have been read)
-    pub block_data_update: bool,
+    pub block_data_update: RegisterBits<1, 6>,
     /// Interrupt activation level. Default value: 0
     /// (0: interrupt output pads active high; 1: interrupt output pads active low)
-    pub high_low_active: bool,
+    pub high_low_active: RegisterBits<1, 5>,
     /// Push-pull/open-drain selection on INT1 and INT2 pads. Default value: 0
     /// (0: push-pull mode; 1: open-drain mode)
-    pub push_pull_open_drain: bool,
+    pub push_pull_open_drain: RegisterBits<1, 4>,
     /// SPI Serial Interface Mode selection. Default value: 0
     /// (0: 4-wire interface; 1: 3-wire interface).
-    pub spi_interface_mode: bool,
+    pub spi_interface_mode: RegisterBits<1, 3>,
     /// Register address automatically incremented during a multiple byte access with a serial interface (I2C or SPI). Default value: 1
     /// (0: disabled; 1: enabled)
-    pub interface_auto_address_increment: bool,
+    pub interface_auto_address_increment: RegisterBits<1, 2>,
     /// Big/Little Endian Data selection. Default value 0
     /// (0: data LSB @ lower address; 1: data MSB @ lower address)
-    pub big_little_endian: bool,
+    pub big_little_endian: RegisterBits<1, 1>,
     /// Software reset. Default value: 0
     /// (0: normal mode; 1: reset device)
     /// This bit is automatically cleared.
-    pub software_reset: bool,
+    pub software_reset: RegisterBits<1, 0>,
 }
 
 impl Default for Ctrl3C {
     fn default() -> Self {
         Self {
-            interface_auto_address_increment: true,
-            reboot_memory_content: false,
-            block_data_update: false,
-            high_low_active: false,
-            push_pull_open_drain: false,
-            spi_interface_mode: false,
-            big_little_endian: false,
-            software_reset: false,
+            interface_auto_address_increment: RegisterBits::new(1),
+            reboot_memory_content: RegisterBits::default(),
+            block_data_update: RegisterBits::default(),
+            high_low_active: RegisterBits::default(),
+            push_pull_open_drain: RegisterBits::default(),
+            spi_interface_mode: RegisterBits::default(),
+            big_little_endian: RegisterBits::default(),
+            software_reset: RegisterBits::default(),
         }
     }
 }
@@ -55,41 +54,14 @@ impl Ctrl3C {
     }
 
     pub fn value(&self) -> u8 {
-        let mut value: u8 = 0;
-
-        if self.reboot_memory_content {
-            value |= 1 << 7;
-        }
-
-        if self.block_data_update {
-            value |= 1 << 6;
-        }
-
-        if self.high_low_active {
-            value |= 1 << 5;
-        }
-
-        if self.push_pull_open_drain {
-            value |= 1 << 4;
-        }
-
-        if self.spi_interface_mode {
-            value |= 1 << 3;
-        }
-
-        if self.interface_auto_address_increment {
-            value |= 1 << 2;
-        }
-
-        if self.big_little_endian {
-            value |= 1 << 1;
-        }
-
-        if self.software_reset {
-            value |= 1 << 0;
-        }
-
-        value
+        self.reboot_memory_content.shifted()
+            | self.block_data_update.shifted()
+            | self.high_low_active.shifted()
+            | self.push_pull_open_drain.shifted()
+            | self.spi_interface_mode.shifted()
+            | self.interface_auto_address_increment.shifted()
+            | self.big_little_endian.shifted()
+            | self.software_reset.shifted()
     }
 
     pub fn config(&self) -> RegisterConfig {

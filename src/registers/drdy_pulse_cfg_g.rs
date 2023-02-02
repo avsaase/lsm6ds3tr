@@ -2,8 +2,7 @@
 
 #![allow(non_camel_case_types)]
 
-use crate::registers::RegisterConfig;
-use crate::RegisterAddress;
+use crate::{RegisterAddress, RegisterBits, RegisterConfig, RegisterValue};
 
 /// DataReady configuration register (r/w).
 #[derive(Default)]
@@ -11,10 +10,10 @@ pub struct DrdyPulseCfgG {
     /// Enable pulsed DataReady mode. Default value: 0
     /// (0: DataReady latched mode. Returns to 0 only after output data have been read;
     /// 1: DataReady pulsed mode. The DataReady pulses are 75 μs long.)
-    pub pulsed_data_ready: bool,
+    pub pulsed_data_ready: RegisterBits<1, 7>,
     /// Wrist tilt interrupt on INT2 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub int2_wrist_tilt: bool,
+    pub int2_wrist_tilt: RegisterBits<1, 0>,
 }
 
 impl DrdyPulseCfgG {
@@ -23,17 +22,7 @@ impl DrdyPulseCfgG {
     }
 
     pub fn value(&self) -> u8 {
-        let mut value: u8 = 0;
-
-        if self.pulsed_data_ready {
-            value |= 1 << 7;
-        }
-
-        if self.int2_wrist_tilt {
-            value |= 1 << 0;
-        }
-
-        value
+        self.pulsed_data_ready.shifted() | self.int2_wrist_tilt.shifted()
     }
 
     pub fn config(&self) -> RegisterConfig {

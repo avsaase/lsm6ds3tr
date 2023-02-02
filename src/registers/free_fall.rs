@@ -1,13 +1,13 @@
 //! Free-fall function duration setting register (r/w).
 
-use crate::{RegisterAddress, RegisterConfig};
+use crate::{RegisterAddress, RegisterBits, RegisterConfig, RegisterValue};
 
 /// Free-fall function duration setting register (r/w).
 #[derive(Default)]
 pub struct FreeFall {
     /// Free-fall duration event. Default: 0
     /// For the complete configuration of the free fall duration, refer to FF_DUR5 in WAKE_UP_DUR (5Ch) configuration
-    pub duration_event: u8,
+    pub duration_event: RegisterBits<5, 3>,
     /// Free fall threshold setting. Default: 000
     /// For details refer to Table 196.
     pub threshold: FreeFallThreshold,
@@ -19,7 +19,7 @@ impl FreeFall {
     }
 
     pub fn value(&self) -> u8 {
-        (self.duration_event & 0b11111) << 3 | self.threshold.value()
+        self.duration_event.shifted() | self.threshold.shifted()
     }
 
     pub fn config(&self) -> RegisterConfig {
@@ -45,8 +45,8 @@ pub enum FreeFallThreshold {
     _500_mg = 0b111,
 }
 
-impl FreeFallThreshold {
-    pub fn value(self) -> u8 {
-        self as u8
+impl RegisterValue for FreeFallThreshold {
+    fn shifted(&self) -> u8 {
+        *self as u8
     }
 }

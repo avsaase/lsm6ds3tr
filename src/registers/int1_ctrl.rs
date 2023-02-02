@@ -1,7 +1,6 @@
 //! INT1 pad control register (r/w).
 
-use crate::RegisterAddress;
-use crate::RegisterConfig;
+use crate::{RegisterAddress, RegisterBits, RegisterConfig, RegisterValue};
 
 /// INT1 pad control register (r/w).
 /// Each bit in this register enables a signal to be carried through INT1. The pad’s output will supply the OR combination of the selected signals.
@@ -9,28 +8,28 @@ use crate::RegisterConfig;
 pub struct Int1Ctrl {
     /// Pedometer step recognition interrupt enable on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub pedometer_step_recognition: bool,
+    pub pedometer_step_recognition: RegisterBits<1, 7>,
     /// Significant motion interrupt enable on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub significant_motion: bool,
+    pub significant_motion: RegisterBits<1, 6>,
     /// FIFO full flag interrupt enable on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub fifo_full: bool,
+    pub fifo_full: RegisterBits<1, 5>,
     /// FIFO overrun interrupt on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub fifo_overrun: bool,
+    pub fifo_overrun: RegisterBits<1, 4>,
     /// FIFO threshold interrupt on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub fifo_threshold: bool,
+    pub fifo_threshold: RegisterBits<1, 3>,
     /// Boot status available on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub boot_status_available: bool,
+    pub boot_status_available: RegisterBits<1, 2>,
     /// Gyroscope Data Ready on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub gyroscope_data_ready: bool,
+    pub gyroscope_data_ready: RegisterBits<1, 1>,
     /// Accelerometer Data Ready on INT1 pad. Default value: 0
     /// (0: disabled; 1: enabled)
-    pub accelerometer_data_ready: bool,
+    pub accelerometer_data_ready: RegisterBits<1, 0>,
 }
 
 impl Int1Ctrl {
@@ -39,41 +38,14 @@ impl Int1Ctrl {
     }
 
     pub fn value(&self) -> u8 {
-        let mut value: u8 = 0;
-
-        if self.pedometer_step_recognition {
-            value |= 1 << 7;
-        }
-
-        if self.significant_motion {
-            value |= 1 << 6;
-        }
-
-        if self.fifo_full {
-            value |= 1 << 5;
-        }
-
-        if self.fifo_overrun {
-            value |= 1 << 4;
-        }
-
-        if self.fifo_threshold {
-            value |= 1 << 3;
-        }
-
-        if self.boot_status_available {
-            value |= 1 << 2;
-        }
-
-        if self.gyroscope_data_ready {
-            value |= 1 << 1;
-        }
-
-        if self.accelerometer_data_ready {
-            value |= 1 << 0;
-        }
-
-        value
+        self.pedometer_step_recognition.shifted()
+            | self.significant_motion.shifted()
+            | self.fifo_full.shifted()
+            | self.fifo_overrun.shifted()
+            | self.fifo_threshold.shifted()
+            | self.boot_status_available.shifted()
+            | self.gyroscope_data_ready.shifted()
+            | self.accelerometer_data_ready.shifted()
     }
 
     pub fn config(&self) -> RegisterConfig {

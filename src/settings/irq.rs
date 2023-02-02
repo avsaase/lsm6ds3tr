@@ -136,14 +136,14 @@ impl IrqSettings {
     }
 
     pub fn enable_irqs(&mut self, latched_irq: bool) {
-        self.registers.tap_cfg.enable_basic_interrupts = true;
-        self.registers.tap_cfg.latched_interrupt = latched_irq;
+        self.registers.tap_cfg.enable_basic_interrupts = 1.into();
+        self.registers.tap_cfg.latched_interrupt = latched_irq.into();
 
         self.update_registers();
     }
 
     pub fn disable_irqs(&mut self) {
-        self.registers.tap_cfg.enable_basic_interrupts = false;
+        self.registers.tap_cfg.enable_basic_interrupts = 0.into();
 
         self.update_registers();
     }
@@ -174,15 +174,15 @@ impl IrqSettings {
             self.registers.md1_cfg.free_fall_event,
             self.registers.md2_cfg.free_fall_event,
         ) = match self.tap.interrupt_route {
-            InterruptRoute::None => (false, false),
-            InterruptRoute::Int1 => (true, false),
-            InterruptRoute::Int2 => (false, true),
-            InterruptRoute::Both => (true, true),
+            InterruptRoute::None => (0.into(), 0.into()),
+            InterruptRoute::Int1 => (1.into(), 0.into()),
+            InterruptRoute::Int2 => (0.into(), 1.into()),
+            InterruptRoute::Both => (1.into(), 1.into()),
         };
         self.registers.free_fall.threshold = self.free_fall.threshold;
         self.registers.wake_up_dur.free_fall_duration_event =
-            ((self.free_fall.threshold as u8) >> 5) & 0b1;
-        self.registers.free_fall.duration_event = self.free_fall.duration_samples;
+            (((self.free_fall.threshold as u8) >> 5) & 0b1).into();
+        self.registers.free_fall.duration_event = self.free_fall.duration_samples.into();
     }
 
     fn update_wake_up_registers(&mut self) {
@@ -190,21 +190,21 @@ impl IrqSettings {
             self.registers.md1_cfg.wake_up_event,
             self.registers.md2_cfg.wake_up_event,
         ) = match self.tap.interrupt_route {
-            InterruptRoute::None => (false, false),
-            InterruptRoute::Int1 => (true, false),
-            InterruptRoute::Int2 => (false, true),
-            InterruptRoute::Both => (true, true),
+            InterruptRoute::None => (0.into(), 0.into()),
+            InterruptRoute::Int1 => (1.into(), 0.into()),
+            InterruptRoute::Int2 => (0.into(), 1.into()),
+            InterruptRoute::Both => (1.into(), 1.into()),
         };
-        self.registers.wake_up_ths.wake_up_threshold = self.wake_up.threshold;
+        self.registers.wake_up_ths.wake_up_threshold = self.wake_up.threshold.into();
     }
 
     fn update_tap_registers(&mut self) {
         match self.tap.recognition_mode {
             TapRecognitionMode::None | TapRecognitionMode::Single => {
-                self.registers.wake_up_ths.single_and_double_tap_enabled = false
+                self.registers.wake_up_ths.single_and_double_tap_enabled = 0.into()
             }
             TapRecognitionMode::Double | TapRecognitionMode::Both => {
-                self.registers.wake_up_ths.single_and_double_tap_enabled = true
+                self.registers.wake_up_ths.single_and_double_tap_enabled = 1.into()
             }
         }
         match self.tap.recognition_mode {
@@ -216,13 +216,16 @@ impl IrqSettings {
                 self.update_double_tap_registers();
             }
         };
-        self.registers.tap_cfg.enable_x_direction_tap_recognition = self.tap.direction_enable.x;
-        self.registers.tap_cfg.enable_y_direction_tap_recognition = self.tap.direction_enable.y;
-        self.registers.tap_cfg.enable_z_direction_tap_recognition = self.tap.direction_enable.z;
-        self.registers.tap_ths_6d.tap_threshold = self.tap.threshold;
-        self.registers.int_dur2.duration = self.tap.duration_samples;
-        self.registers.int_dur2.quiet = self.tap.quiet_samples;
-        self.registers.int_dur2.shock = self.tap.shock_samples;
+        self.registers.tap_cfg.enable_x_direction_tap_recognition =
+            self.tap.direction_enable.x.into();
+        self.registers.tap_cfg.enable_y_direction_tap_recognition =
+            self.tap.direction_enable.y.into();
+        self.registers.tap_cfg.enable_z_direction_tap_recognition =
+            self.tap.direction_enable.z.into();
+        self.registers.tap_ths_6d.tap_threshold = self.tap.threshold.into();
+        self.registers.int_dur2.duration = self.tap.duration_samples.into();
+        self.registers.int_dur2.quiet = self.tap.quiet_samples.into();
+        self.registers.int_dur2.shock = self.tap.shock_samples.into();
     }
 
     fn update_single_tap_registers(&mut self) {
@@ -230,10 +233,10 @@ impl IrqSettings {
             self.registers.md1_cfg.single_tap_event,
             self.registers.md2_cfg.single_tap_event,
         ) = match self.tap.interrupt_route {
-            InterruptRoute::None => (false, false),
-            InterruptRoute::Int1 => (true, false),
-            InterruptRoute::Int2 => (false, true),
-            InterruptRoute::Both => (true, true),
+            InterruptRoute::None => (0.into(), 0.into()),
+            InterruptRoute::Int1 => (1.into(), 0.into()),
+            InterruptRoute::Int2 => (0.into(), 1.into()),
+            InterruptRoute::Both => (1.into(), 1.into()),
         };
     }
 
@@ -242,10 +245,10 @@ impl IrqSettings {
             self.registers.md1_cfg.double_tap_event,
             self.registers.md2_cfg.double_tap_event,
         ) = match self.tap.interrupt_route {
-            InterruptRoute::None => (false, false),
-            InterruptRoute::Int1 => (true, false),
-            InterruptRoute::Int2 => (false, true),
-            InterruptRoute::Both => (true, true),
+            InterruptRoute::None => (0.into(), 0.into()),
+            InterruptRoute::Int1 => (1.into(), 0.into()),
+            InterruptRoute::Int2 => (0.into(), 1.into()),
+            InterruptRoute::Both => (1.into(), 1.into()),
         };
     }
 }
