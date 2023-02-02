@@ -229,6 +229,10 @@ impl<const BITS_NUM: u8, const BITS_POS: u8> RegisterBits<BITS_NUM, BITS_POS> {
         self.value = (value >> BITS_POS) & Self::bit_mask();
     }
 
+    pub fn value(&self) -> u8 {
+        self.value
+    }
+
     pub fn bit_mask() -> u8 {
         (1 << BITS_NUM) - 1
     }

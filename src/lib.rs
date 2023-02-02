@@ -12,9 +12,12 @@ use data::XYZ;
 use interface::Interface;
 use registers::{
     AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterBits,
-    RegisterConfig, RegisterValue,
+    RegisterConfig, RegisterValue, TapSrc, WakeUpSrc,
 };
 use settings::{AccelSettings, GyroSettings, IrqSettings};
+
+extern crate alloc;
+use alloc::vec::Vec;
 
 #[derive(Default)]
 pub struct LsmSettings {
@@ -133,6 +136,16 @@ where
         Ok(temp as f32 / TEMP_SCALE + TEMP_BIAS)
     }
 
+    pub fn read_interrupt_source(&mut self) -> Result<Vec<IrqSource>, I::Error> {
+        let mut wake_up_src = WakeUpSrc::default();
+        let mut tap_src = TapSrc::default();
+        // TODO add FUNC_SRC1 reading
+        // TODO add FUNC_SRC2 reading
+        wake_up_src = self.read_register(wake_up_src.address())?.into();
+        tap_src = self.read_register(tap_src.address())?.into();
+        Ok([wake_up_src.get_irq_sources(), tap_src.get_irq_sources()].concat())
+    }
+
     fn read_sensor_raw(&mut self, addr: u8) -> Result<XYZ<i16>, I::Error> {
         let mut bytes = [0u8; 6];
         self.interface.read(addr, &mut bytes)?;
@@ -164,4 +177,20 @@ where
         self.write_register(register_config.address, register_config.value)?;
         Ok(())
     }
+}
+
+#[derive(Clone)]
+pub enum IrqSource {
+    FreeFall,
+    Sleep,
+    WakeUp,
+    WakeUpOnX,
+    WakeUpOnY,
+    WakeUpOnZ,
+    Tap,
+    SingleTap,
+    DoubleTap,
+    TapOnX,
+    TapOnY,
+    TapOnZ,
 }

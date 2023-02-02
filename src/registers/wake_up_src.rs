@@ -1,6 +1,9 @@
 //! Wake up interrupt source register (r).
 
-use crate::{RegisterAddress, RegisterBits};
+use crate::{IrqSource, RegisterAddress, RegisterBits};
+
+extern crate alloc;
+use alloc::vec::Vec;
 
 /// Wake up interrupt source register (r).
 #[derive(Default)]
@@ -28,6 +31,29 @@ pub struct WakeUpSrc {
 impl WakeUpSrc {
     pub fn address(&self) -> u8 {
         RegisterAddress::WAKE_UP_SRC.address()
+    }
+
+    pub fn get_irq_sources(&self) -> Vec<IrqSource> {
+        let mut v: Vec<IrqSource> = Default::default();
+        if self.free_fall_event.value() != 0 {
+            v.push(IrqSource::FreeFall);
+        }
+        if self.sleep_event.value() != 0 {
+            v.push(IrqSource::Sleep);
+        }
+        if self.wake_up_event.value() != 0 {
+            v.push(IrqSource::WakeUp);
+        }
+        if self.wake_up_event_x.value() != 0 {
+            v.push(IrqSource::WakeUpOnX);
+        }
+        if self.wake_up_event_y.value() != 0 {
+            v.push(IrqSource::WakeUpOnY);
+        }
+        if self.wake_up_event_z.value() != 0 {
+            v.push(IrqSource::WakeUpOnZ);
+        }
+        v
     }
 }
 

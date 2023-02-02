@@ -1,12 +1,10 @@
 use crate::{
     data::XYZ,
     registers::{
-        FreeFall, Int1Ctrl, Int2Ctrl, IntDur2, Md1Cfg, Md2Cfg, RegisterConfig, TapCfg, TapThs6d,
-        WakeUpDur, WakeUpThs,
+        FreeFall, FreeFallThreshold, Int1Ctrl, Int2Ctrl, IntDur2, Md1Cfg, Md2Cfg, RegisterConfig,
+        TapCfg, TapThs6d, WakeUpDur, WakeUpThs,
     },
 };
-
-pub use crate::registers::FreeFallThreshold;
 
 #[derive(Default, Clone, Copy)]
 pub enum InterruptRoute {
