@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -xEeuo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+ci/test
+ci/test --release

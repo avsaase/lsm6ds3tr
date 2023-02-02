@@ -5,6 +5,8 @@ stages:
   - docker
   - check
   - build
+  - test
+  - doc
 
 docker-lint:
   stage: docker
@@ -36,13 +38,19 @@ check:
     - ci/jobs/check
 
 doc:
-  stage: check
+  stage: doc
   dependencies: []
   script:
     - ci/jobs/doc
 
 build:
   stage: build
-  dependencies: []
+  dependencies: ["check"]
   script:
     - ci/jobs/build
+
+test:
+  stage: test
+  dependencies: ["build"]
+  script:
+    - ci/jobs/test

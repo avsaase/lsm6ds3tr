@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -xEeuo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+./ci/jobs/check
+./ci/jobs/build
+./ci/jobs/test
+./ci/jobs/doc
