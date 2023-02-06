@@ -1,35 +1,11 @@
 default:
-  image: $CI_REGISTRY_IMAGE:latest
+  # https://gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker
+  image: registry.gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker:2a8ade0b2c3550489dc50e912fb8c0de
 
 stages:
-  - docker
   - check
   - build
   - test
-  - doc
-
-docker-lint:
-  stage: docker
-  image: hadolint/hadolint:v2.9.3-debian
-  script:
-    - hadolint Dockerfile
-
-docker-image:
-  stage: docker
-  image: docker:20.10.14
-  needs: ["docker-lint"]
-  dependencies: []
-  services:
-    - docker:dind
-  tags:
-    - docker
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-  script:
-    - docker pull $CI_REGISTRY_IMAGE:latest || true
-    - docker build . --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --tag $CI_REGISTRY_IMAGE:latest
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    - docker push $CI_REGISTRY_IMAGE:latest
 
 check:
   stage: check
@@ -38,19 +14,22 @@ check:
     - ci/jobs/check
 
 doc:
-  stage: doc
+  stage: check
   dependencies: []
   script:
     - ci/jobs/doc
+  allow_failure: true
 
 build:
   stage: build
+  needs: ["check"]
   dependencies: ["check"]
   script:
     - ci/jobs/build
 
 test:
   stage: test
+  needs: ["build"]
   dependencies: ["build"]
   script:
     - ci/jobs/test
