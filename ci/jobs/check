@@ -9,4 +9,6 @@ ci/check --features defmt
 ci/check --release
 ci/check --features defmt --release
 ci/clippy
+ci/clippy --release
 ci/udeps
+ci/udeps --release
