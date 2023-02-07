@@ -14,17 +14,10 @@ use registers::{
     AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterBits,
     RegisterConfig, RegisterValue, TapSrc, WakeUpSrc,
 };
-use settings::{AccelSettings, GyroSettings, IrqSettings};
+use settings::{AccelSettings, GyroSettings, IrqSettings, LsmSettings};
 
 extern crate alloc;
 use alloc::vec::Vec;
-
-#[derive(Default)]
-pub struct LsmSettings {
-    accel: AccelSettings,
-    gyro: GyroSettings,
-    irq: IrqSettings,
-}
 
 pub struct LSM6DS3TR<I>
 where
