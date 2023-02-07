@@ -1,3 +1,4 @@
+/// Registers list
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy)]
 pub enum RegisterAddress {
@@ -206,37 +207,47 @@ impl RegisterAddress {
     }
 }
 
+/// Register address+value container
 pub struct RegisterConfig {
     pub address: u8,
     pub value: u8,
 }
 
+/// Simple bit-field structure
 #[derive(Default)]
 pub struct RegisterBits<const BITS_NUM: u8, const BITS_POS: u8> {
     value: u8,
 }
 
 impl<const BITS_NUM: u8, const BITS_POS: u8> RegisterBits<BITS_NUM, BITS_POS> {
+    /// New object with (unshifted) value set
     pub fn new(value: u8) -> Self {
         Self::from(value)
     }
 
-    pub fn new_from_reg(value: u8) -> Self {
-        Self::from((value >> BITS_POS) & Self::bit_mask())
+    /// New object with value set by extracting (shifting) relevant bits from register value
+    pub fn from_reg(value: u8) -> Self {
+        let mut s = Self::default();
+        s.set_from_reg(value);
+        s
     }
 
-    pub fn from_reg(&mut self, value: u8) {
+    /// Sets value by extracting (shifting) relevant bits from register value
+    pub fn set_from_reg(&mut self, value: u8) {
         self.value = (value >> BITS_POS) & Self::bit_mask();
     }
 
+    /// Returns unshifted value
     pub fn value(&self) -> u8 {
         self.value
     }
 
+    /// Returns unshifted bit mask
     pub fn bit_mask() -> u8 {
         (1 << BITS_NUM) - 1
     }
 
+    /// Returns shifted bit mask
     pub fn bit_shifted_mask() -> u8 {
         Self::bit_mask() << BITS_POS
     }
@@ -247,6 +258,7 @@ pub trait RegisterValue {
 }
 
 impl<const BITS_NUM: u8, const BITS_POS: u8> RegisterValue for RegisterBits<BITS_NUM, BITS_POS> {
+    /// Returns shifted value to be OR-ed into register value
     fn shifted(&self) -> u8 {
         (self.value & Self::bit_mask()) << BITS_POS
     }
@@ -367,7 +379,7 @@ mod tests {
     fn new_from_reg_1_0() {
         const BITS: u8 = 1;
         const POS: u8 = 0;
-        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        let rb = RegisterBits::<BITS, POS>::from_reg(0b11111111);
         assert_eq!(rb.value, 0b1);
         assert_eq!(rb.shifted(), 0b1);
     }
@@ -376,7 +388,7 @@ mod tests {
     fn new_from_reg_1_1() {
         const BITS: u8 = 1;
         const POS: u8 = 1;
-        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        let rb = RegisterBits::<BITS, POS>::from_reg(0b11111111);
         assert_eq!(rb.value, 0b1);
         assert_eq!(rb.shifted(), 0b10);
     }
@@ -385,7 +397,7 @@ mod tests {
     fn new_from_reg_2_0() {
         const BITS: u8 = 2;
         const POS: u8 = 0;
-        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        let rb = RegisterBits::<BITS, POS>::from_reg(0b11111111);
         assert_eq!(rb.value, 0b11);
         assert_eq!(rb.shifted(), 0b11);
     }
@@ -394,7 +406,7 @@ mod tests {
     fn new_from_reg_2_1() {
         const BITS: u8 = 2;
         const POS: u8 = 1;
-        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        let rb = RegisterBits::<BITS, POS>::from_reg(0b11111111);
         assert_eq!(rb.value, 0b11);
         assert_eq!(rb.shifted(), 0b110);
     }
@@ -403,7 +415,7 @@ mod tests {
     fn new_from_reg_2_2() {
         const BITS: u8 = 2;
         const POS: u8 = 2;
-        let rb = RegisterBits::<BITS, POS>::new_from_reg(0b11111111);
+        let rb = RegisterBits::<BITS, POS>::from_reg(0b11111111);
         assert_eq!(rb.value, 0b11);
         assert_eq!(rb.shifted(), 0b1100);
     }
@@ -414,7 +426,7 @@ mod tests {
         const POS: u8 = 0;
         let mut rb = RegisterBits::<BITS, POS>::default();
         let reg: u8 = 0b11111111;
-        rb.from_reg(reg);
+        rb.set_from_reg(reg);
         assert_eq!(rb.value, 0b1);
         assert_eq!(rb.shifted(), 0b1);
     }
@@ -425,7 +437,7 @@ mod tests {
         const POS: u8 = 1;
         let mut rb = RegisterBits::<BITS, POS>::default();
         let reg: u8 = 0b11111111;
-        rb.from_reg(reg);
+        rb.set_from_reg(reg);
         assert_eq!(rb.value, 0b1);
         assert_eq!(rb.shifted(), 0b10);
     }
@@ -436,7 +448,7 @@ mod tests {
         const POS: u8 = 0;
         let mut rb = RegisterBits::<BITS, POS>::default();
         let reg: u8 = 0b11111111;
-        rb.from_reg(reg);
+        rb.set_from_reg(reg);
         assert_eq!(rb.value, 0b11);
         assert_eq!(rb.shifted(), 0b11);
     }
@@ -447,7 +459,7 @@ mod tests {
         const POS: u8 = 1;
         let mut rb = RegisterBits::<BITS, POS>::default();
         let reg: u8 = 0b11111111;
-        rb.from_reg(reg);
+        rb.set_from_reg(reg);
         assert_eq!(rb.value, 0b11);
         assert_eq!(rb.shifted(), 0b110);
     }
@@ -458,7 +470,7 @@ mod tests {
         const POS: u8 = 2;
         let mut rb = RegisterBits::<BITS, POS>::default();
         let reg: u8 = 0b11111111;
-        rb.from_reg(reg);
+        rb.set_from_reg(reg);
         assert_eq!(rb.value, 0b11);
         assert_eq!(rb.shifted(), 0b1100);
     }

@@ -1,5 +1,6 @@
 use core::fmt::{Display, Result};
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Default)]
 pub struct XYZ<T> {
     pub x: T,

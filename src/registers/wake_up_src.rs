@@ -60,12 +60,12 @@ impl WakeUpSrc {
 impl From<u8> for WakeUpSrc {
     fn from(value: u8) -> Self {
         let mut s = Self::default();
-        s.free_fall_event.from_reg(value);
-        s.sleep_event.from_reg(value);
-        s.wake_up_event.from_reg(value);
-        s.wake_up_event_x.from_reg(value);
-        s.wake_up_event_y.from_reg(value);
-        s.wake_up_event_z.from_reg(value);
+        s.free_fall_event.set_from_reg(value);
+        s.sleep_event.set_from_reg(value);
+        s.wake_up_event.set_from_reg(value);
+        s.wake_up_event_x.set_from_reg(value);
+        s.wake_up_event_y.set_from_reg(value);
+        s.wake_up_event_z.set_from_reg(value);
         s
     }
 }

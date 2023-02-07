@@ -9,6 +9,7 @@ pub enum InterfaceE<CommE, PinE> {
     Pin(PinE),
 }
 
+/// SPI communication interface
 pub struct SpiInterface<SPI, CS> {
     spi: SPI,
     cs: CS,

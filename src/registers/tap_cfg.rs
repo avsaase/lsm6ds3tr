@@ -74,8 +74,8 @@ impl RegisterValue for InactivityFunctionMode {
 #[derive(Default, Clone, Copy)]
 pub enum FilterSelected {
     #[default]
-    SLOPE = 0b0,
-    HPF = 0b1,
+    Slope = 0b0,
+    HighPassFilter = 0b1,
 }
 
 impl RegisterValue for FilterSelected {

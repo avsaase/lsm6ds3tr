@@ -1,6 +1,7 @@
 use crate::registers::Ctrl1Xl;
 use crate::{AccelODR, AccelScale, RegisterConfig};
 
+/// Accelerometer settings
 #[derive(Default)]
 pub struct AccelSettings {
     pub sample_rate: AccelODR,
@@ -10,10 +11,6 @@ pub struct AccelSettings {
 impl AccelSettings {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn new_simple() -> Self {
-        Self::new()
             .with_sample_rate(AccelODR::_416Hz)
             .with_scale(AccelScale::_2G)
     }
@@ -28,6 +25,7 @@ impl AccelSettings {
         self
     }
 
+    /// Returns accelerometer-related register config to be written
     pub fn config(&self) -> RegisterConfig {
         Ctrl1Xl {
             sample_rate: self.sample_rate,

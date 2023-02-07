@@ -8,6 +8,7 @@ pub enum InterfaceE<CommE> {
     Comm(CommE),
 }
 
+/// I2C communication interface
 pub struct I2cInterface<I2C> {
     i2c: I2C,
 }

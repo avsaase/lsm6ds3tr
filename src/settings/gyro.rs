@@ -1,6 +1,7 @@
-use crate::registers::ctrl2_g::Ctrl2G;
+use crate::registers::Ctrl2G;
 use crate::{GyroODR, GyroScale, RegisterConfig};
 
+/// Gyroscope settings
 #[derive(Default)]
 pub struct GyroSettings {
     pub scale: GyroScale,
@@ -10,10 +11,6 @@ pub struct GyroSettings {
 impl GyroSettings {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn new_simple() -> Self {
-        GyroSettings::new()
             .with_sample_rate(GyroODR::_416Hz)
             .with_scale(GyroScale::_250DPS)
     }
@@ -28,6 +25,7 @@ impl GyroSettings {
         self
     }
 
+    /// Returns gyroscope-related register config to be written
     pub fn config(&self) -> RegisterConfig {
         Ctrl2G {
             sample_rate: self.sample_rate,

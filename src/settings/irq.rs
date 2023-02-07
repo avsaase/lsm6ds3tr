@@ -6,6 +6,7 @@ use crate::{
     },
 };
 
+/// Interrupt pin/pad routing selection
 #[derive(Default, Clone, Copy)]
 pub enum InterruptRoute {
     #[default]
@@ -60,6 +61,7 @@ pub struct ActivityIrqSettings {
     // TODO
 }
 
+/// Interrupt settings
 #[derive(Default)]
 pub struct IrqSettings {
     pub free_fall: FreeFallIrqSettings,
@@ -85,10 +87,7 @@ struct IrqRegisters {
 }
 
 impl IrqSettings {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
+    /// Enables Free Fall interrupt
     pub fn enable_free_fall_irq(
         &mut self,
         threshold: FreeFallThreshold,
@@ -105,6 +104,7 @@ impl IrqSettings {
         self.update_registers();
     }
 
+    /// Enables Wake Up interrupt
     pub fn enable_wake_up_irq(
         &mut self,
         threshold: u8,
@@ -119,6 +119,7 @@ impl IrqSettings {
         self.update_registers();
     }
 
+    /// Enables Single/Double Tap interrupt
     pub fn enable_tap_irq(
         &mut self,
         tap_recognition_mode: TapRecognitionMode,
@@ -133,6 +134,7 @@ impl IrqSettings {
         self.update_registers();
     }
 
+    /// Enables basic interrupts
     pub fn enable_irqs(&mut self, latched_irq: bool) {
         self.registers.tap_cfg.enable_basic_interrupts = 1.into();
         self.registers.tap_cfg.latched_interrupt = latched_irq.into();
@@ -140,12 +142,14 @@ impl IrqSettings {
         self.update_registers();
     }
 
+    /// Disables basic interrupts
     pub fn disable_irqs(&mut self) {
         self.registers.tap_cfg.enable_basic_interrupts = 0.into();
 
         self.update_registers();
     }
 
+    /// Returns interrupt-related registers configs to be written
     pub fn configs(&self) -> [RegisterConfig; 10] {
         [
             self.registers.int1_ctrl.config(),

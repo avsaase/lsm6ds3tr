@@ -3,6 +3,7 @@ pub mod spi;
 pub use self::i2c::I2cInterface;
 pub use self::spi::SpiInterface;
 
+/// Communication interface
 pub trait Interface {
     type Error;
 

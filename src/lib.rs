@@ -1,11 +1,11 @@
 #![cfg_attr(not(test), no_std)]
 #![allow(dead_code)]
 
-pub mod consts;
-pub mod data;
-pub mod interface;
-pub mod registers;
-pub mod settings;
+mod consts;
+mod data;
+mod interface;
+mod registers;
+mod settings;
 
 use consts::*;
 use data::XYZ;
@@ -14,11 +14,12 @@ use registers::{
     AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterBits,
     RegisterConfig, RegisterValue, TapSrc, WakeUpSrc,
 };
-use settings::{AccelSettings, GyroSettings, IrqSettings, LsmSettings};
+pub use settings::{AccelSettings, GyroSettings, IrqSettings, LsmSettings};
 
 extern crate alloc;
 use alloc::vec::Vec;
 
+/// Device driver
 pub struct LSM6DS3TR<I>
 where
     I: Interface,
@@ -31,6 +32,7 @@ impl<I> LSM6DS3TR<I>
 where
     I: Interface,
 {
+    /// Returns uninitialized device object with default settings
     pub fn new(interface: I) -> Self {
         Self {
             interface,
@@ -38,30 +40,26 @@ where
         }
     }
 
+    /// Returns uninitialized device object with provided settings
     pub fn with_settings(mut self, settings: LsmSettings) -> Self {
         self.settings = settings;
         self
     }
 
-    pub fn with_accel(mut self, accel_settings: AccelSettings) -> Self {
-        self.settings.accel = accel_settings;
-        self
+    /// Initializes device with stored settings
+    pub fn init(&mut self) -> Result<(), I::Error> {
+        self.init_accel()?;
+        self.init_gyro()?;
+        self.init_irqs()?;
+        Ok(())
     }
 
-    pub fn with_gyro(mut self, gyro_settings: GyroSettings) -> Self {
-        self.settings.gyro = gyro_settings;
-        self
-    }
-
-    pub fn with_irq(mut self, irq_settings: IrqSettings) -> Self {
-        self.settings.irq = irq_settings;
-        self
-    }
-
+    /// Returns if device is reachable
     pub fn is_reachable(&mut self) -> Result<bool, I::Error> {
         Ok(self.read_register(RegisterAddress::WHO_AM_I.address())? == LSM6DS3TR_ID)
     }
 
+    /// Performs a software reset
     pub fn software_reset(&mut self) -> Result<(), I::Error> {
         let ctrl3_c = Ctrl3C {
             software_reset: RegisterBits::new(1),
@@ -71,27 +69,32 @@ where
         Ok(())
     }
 
-    pub fn setup_accel(&mut self) -> Result<(), I::Error> {
+    /// Initializes accelerometer with stored settings
+    pub fn init_accel(&mut self) -> Result<(), I::Error> {
         self.write_register_config(self.settings.accel.config())?;
         Ok(())
     }
 
-    pub fn setup_gyro(&mut self) -> Result<(), I::Error> {
+    /// Initializes gyroscope with stored settings
+    pub fn init_gyro(&mut self) -> Result<(), I::Error> {
         self.write_register_config(self.settings.gyro.config())?;
         Ok(())
     }
 
-    pub fn setup_irqs(&mut self) -> Result<(), I::Error> {
+    /// Initializes interrupts with stored settings
+    pub fn init_irqs(&mut self) -> Result<(), I::Error> {
         for config in self.settings.irq.configs() {
             self.write_register_config(config)?;
         }
         Ok(())
     }
 
+    /// Returns accelerometer raw readings
     pub fn read_accel_raw(&mut self) -> Result<XYZ<i16>, I::Error> {
         self.read_sensor_raw(RegisterAddress::OUTX_L_XL.address())
     }
 
+    /// Returns accelerometer scaled readings \[g]
     pub fn read_accel(&mut self) -> Result<XYZ<f32>, I::Error> {
         let xyz = self.read_accel_raw()?;
         let sensitivity = self.settings.accel.scale.sensitivity();
@@ -102,10 +105,12 @@ where
         })
     }
 
+    /// Returns gyroscope raw readings
     pub fn read_gyro_raw(&mut self) -> Result<XYZ<i16>, I::Error> {
         self.read_sensor_raw(RegisterAddress::OUTX_L_G.address())
     }
 
+    /// Returns gyroscope scaled readings [°/s]
     pub fn read_gyro(&mut self) -> Result<XYZ<f32>, I::Error> {
         let xyz = self.read_gyro_raw()?;
         let sensitivity = self.settings.gyro.scale.sensitivity();
@@ -116,6 +121,7 @@ where
         })
     }
 
+    /// Returns temperature sensor raw reading
     pub fn read_temp_raw(&mut self) -> Result<i16, I::Error> {
         let mut bytes = [0u8; 2];
         self.interface
@@ -124,12 +130,14 @@ where
         Ok(temp)
     }
 
+    /// Returns temperature sensor scaled reading [°C]
     pub fn read_temp(&mut self) -> Result<f32, I::Error> {
         let temp = self.read_temp_raw()?;
         Ok(temp as f32 / TEMP_SCALE + TEMP_BIAS)
     }
 
-    pub fn read_interrupt_source(&mut self) -> Result<Vec<IrqSource>, I::Error> {
+    /// Returns last interrupt sources
+    pub fn read_interrupt_sources(&mut self) -> Result<Vec<IrqSource>, I::Error> {
         let mut wake_up_src = WakeUpSrc::default();
         let mut tap_src = TapSrc::default();
         // TODO add FUNC_SRC1 reading
@@ -172,6 +180,7 @@ where
     }
 }
 
+/// Interrupt sources
 #[derive(Clone)]
 pub enum IrqSource {
     FreeFall,

@@ -64,13 +64,13 @@ impl TapSrc {
 impl From<u8> for TapSrc {
     fn from(value: u8) -> Self {
         let mut s = Self::default();
-        s.tap_event.from_reg(value);
-        s.single_tap_event.from_reg(value);
-        s.double_tap_event.from_reg(value);
-        s.tap_sign_acceleration.from_reg(value);
-        s.tap_x_axis.from_reg(value);
-        s.tap_y_axis.from_reg(value);
-        s.tap_z_axis.from_reg(value);
+        s.tap_event.set_from_reg(value);
+        s.single_tap_event.set_from_reg(value);
+        s.double_tap_event.set_from_reg(value);
+        s.tap_sign_acceleration.set_from_reg(value);
+        s.tap_x_axis.set_from_reg(value);
+        s.tap_y_axis.set_from_reg(value);
+        s.tap_z_axis.set_from_reg(value);
         s
     }
 }
