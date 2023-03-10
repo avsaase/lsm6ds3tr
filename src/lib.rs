@@ -3,7 +3,7 @@
 
 mod consts;
 mod data;
-mod interface;
+pub mod interface;
 mod registers;
 mod settings;
 
