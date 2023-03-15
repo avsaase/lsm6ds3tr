@@ -11,9 +11,12 @@ use consts::*;
 use data::XYZ;
 use interface::Interface;
 use registers::{
-    AccelODR, AccelScale, Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterBits,
-    RegisterConfig, RegisterValue, TapSrc, WakeUpSrc,
+    Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterBits, RegisterConfig, RegisterValue,
+    TapSrc, WakeUpSrc,
 };
+
+pub use registers::{AccelODR, AccelScale};
+
 pub use settings::{AccelSettings, GyroSettings, IrqSettings, LsmSettings};
 
 extern crate alloc;

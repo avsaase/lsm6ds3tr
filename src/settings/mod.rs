@@ -15,6 +15,12 @@ pub struct LsmSettings {
 }
 
 impl LsmSettings {
+    pub fn basic() -> Self {
+        Self::default()
+            .with_accel(AccelSettings::new())
+            .with_gyro(GyroSettings::new())
+    }
+
     pub fn with_accel(mut self, accel_settings: AccelSettings) -> Self {
         self.accel = accel_settings;
         self
