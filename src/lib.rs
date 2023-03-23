@@ -11,8 +11,8 @@ use consts::*;
 use data::XYZ;
 use interface::Interface;
 use registers::{
-    Ctrl3C, GyroSampleRate, GyroScale, RegisterAddress, RegisterBits, RegisterConfig, RegisterValue,
-    TapSrc, WakeUpSrc,
+    Ctrl3C, GyroSampleRate, GyroScale, RegisterAddress, RegisterBits, RegisterConfig,
+    RegisterValue, TapSrc, WakeUpSrc,
 };
 
 pub use registers::{AccelSampleRate, AccelScale};
@@ -54,6 +54,7 @@ where
         self.init_accel()?;
         self.init_gyro()?;
         self.init_irqs()?;
+        self.init_other()?;
         Ok(())
     }
 
@@ -88,6 +89,15 @@ where
     pub fn init_irqs(&mut self) -> Result<(), I::Error> {
         for config in self.settings.irq.configs() {
             self.write_register_config(config)?;
+        }
+        Ok(())
+    }
+
+    /// Initializes other options with stored settings
+    pub fn init_other(&mut self) -> Result<(), I::Error> {
+        if self.settings.low_performance_mode {
+            self.write_register(RegisterAddress::CTRL6_C.address(), 1 << 4)?; // TODO make it right like the others
+            self.write_register(RegisterAddress::CTRL7_G.address(), 1 << 7)?; // TODO make it right like the others
         }
         Ok(())
     }

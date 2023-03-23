@@ -12,6 +12,7 @@ pub struct LsmSettings {
     pub accel: AccelSettings,
     pub gyro: GyroSettings,
     pub irq: IrqSettings,
+    pub low_performance_mode: bool,
 }
 
 impl LsmSettings {
@@ -33,6 +34,11 @@ impl LsmSettings {
 
     pub fn with_irq(mut self, irq_settings: IrqSettings) -> Self {
         self.irq = irq_settings;
+        self
+    }
+
+    pub fn with_low_performance_mode(mut self) -> Self {
+        self.low_performance_mode = true;
         self
     }
 }
