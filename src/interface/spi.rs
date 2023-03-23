@@ -4,6 +4,7 @@ use embedded_hal::{blocking::spi::Transfer, blocking::spi::Write, digital::v2::O
 const SPI_READ: u8 = 0x80;
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[derive(Debug)]
 pub enum InterfaceE<CommE, PinE> {
     Comm(CommE),
     Pin(PinE),

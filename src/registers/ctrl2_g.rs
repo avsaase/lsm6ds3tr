@@ -11,7 +11,7 @@ use super::RegisterValue;
 /// Angular rate sensor control register 2 (r/w).
 pub struct Ctrl2G {
     /// Gyroscope output data rate selection. Default value: 0000 (Refer to Table 55)
-    pub sample_rate: GyroODR,
+    pub sample_rate: GyroSampleRate,
     /// Gyroscope full-scale selection. Default value: 00 (00: 245 dps; 01: 500 dps; 10: 1000 dps; 11: 2000 dps)
     /// Gyroscope full-scale at 125 dps. Default value: 0 (0: disabled; 1: enabled)
     pub scale: GyroScale,
@@ -64,7 +64,7 @@ impl RegisterValue for GyroScale {
 }
 
 #[derive(Default, Debug, Clone, Copy)]
-pub enum GyroODR {
+pub enum GyroSampleRate {
     /// Power Down (disabled)
     #[default]
     PowerDown = 0b0000,
@@ -91,7 +91,7 @@ pub enum GyroODR {
     // Not allowed = [0b1011..0b1111]
 }
 
-impl RegisterValue for GyroODR {
+impl RegisterValue for GyroSampleRate {
     fn shifted(&self) -> u8 {
         (*self as u8) << 4
     }

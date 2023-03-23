@@ -8,7 +8,7 @@ use crate::{RegisterAddress, RegisterBits, RegisterConfig, RegisterValue};
 #[derive(Default)]
 pub struct Ctrl1Xl {
     /// Output data rate and power mode selection. Default value: 0000 (see Table 52).
-    pub sample_rate: AccelODR,
+    pub sample_rate: AccelSampleRate,
     /// Accelerometer full-scale selection. Default value: 00.
     /// (00: ±2 g; 01: ±16 g; 10: ±4 g; 11: ±8 g)
     pub scale: AccelScale,
@@ -67,7 +67,7 @@ impl RegisterValue for AccelScale {
 }
 
 #[derive(Default, Clone, Copy)]
-pub enum AccelODR {
+pub enum AccelSampleRate {
     /// Power Down (disabled)
     #[default]
     PowerDown = 0b0000,
@@ -96,8 +96,8 @@ pub enum AccelODR {
     // Not allowed = [0b1100..0b1111]
 }
 
-impl RegisterValue for AccelODR {
+impl RegisterValue for AccelSampleRate {
     fn shifted(&self) -> u8 {
-        (*self as u8) << 2
+        (*self as u8) << 4
     }
 }

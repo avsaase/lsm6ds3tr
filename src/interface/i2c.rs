@@ -4,6 +4,7 @@ use embedded_hal::blocking::i2c::{Write, WriteRead};
 const I2C_ADDRESS: u8 = 0x6A;
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[derive(Debug)]
 pub enum InterfaceE<CommE> {
     Comm(CommE),
 }

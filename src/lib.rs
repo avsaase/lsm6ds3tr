@@ -11,11 +11,11 @@ use consts::*;
 use data::XYZ;
 use interface::Interface;
 use registers::{
-    Ctrl3C, GyroODR, GyroScale, RegisterAddress, RegisterBits, RegisterConfig, RegisterValue,
+    Ctrl3C, GyroSampleRate, GyroScale, RegisterAddress, RegisterBits, RegisterConfig, RegisterValue,
     TapSrc, WakeUpSrc,
 };
 
-pub use registers::{AccelODR, AccelScale};
+pub use registers::{AccelSampleRate, AccelScale};
 
 pub use settings::{AccelSettings, GyroSettings, IrqSettings, LsmSettings};
 
