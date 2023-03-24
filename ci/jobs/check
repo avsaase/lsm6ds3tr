@@ -10,5 +10,6 @@ ci/check --release
 ci/check --features defmt --release
 ci/clippy
 ci/clippy --release
+ci/cargo-sort
 ci/udeps
 ci/udeps --release

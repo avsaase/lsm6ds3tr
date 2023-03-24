@@ -7,12 +7,11 @@ authors = ["Marcin Czekajło <mtczekajlo@gmail.com>"]
 repository = "https://gitlab.com/mtczekajlo/lsm6ds3tr-rs"
 readme = "readme.md"
 license = "MIT"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-embedded-hal = "0.2.7"
 defmt = { version = "0.3.2", optional = true }
+embedded-hal = "0.2.7"
 
 [features]
 default = []
