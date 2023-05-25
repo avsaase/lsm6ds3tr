@@ -34,7 +34,7 @@ impl WakeUpSrc {
     }
 
     pub fn get_irq_sources(&self) -> Vec<IrqSource> {
-        let mut v: Vec<IrqSource> = Default::default();
+        let mut v = Vec::new();
         if self.free_fall_event.value() != 0 {
             v.push(IrqSource::FreeFall);
         }
