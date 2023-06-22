@@ -97,9 +97,9 @@ impl IrqSettings {
     ) {
         self.enable_irqs(latched_irq);
 
-        self.free_fall.interrupt_route = interrupt_route;
         self.free_fall.threshold = threshold;
         self.free_fall.duration_samples = duration_samples;
+        self.free_fall.interrupt_route = interrupt_route;
 
         self.update_registers();
     }
@@ -113,23 +113,34 @@ impl IrqSettings {
     ) {
         self.enable_irqs(latched_irq);
 
-        self.wake_up.interrupt_route = interrupt_route;
         self.wake_up.threshold = threshold;
+        self.wake_up.interrupt_route = interrupt_route;
 
         self.update_registers();
     }
 
+    // TODO provide helper function calculating desired tap time to register values
     /// Enables Single/Double Tap interrupt
     pub fn enable_tap_irq(
         &mut self,
-        tap_recognition_mode: TapRecognitionMode,
-        tap_direction_enable: XYZ<bool>,
+        recognition_mode: TapRecognitionMode,
+        direction_enable: XYZ<bool>,
+        // threshold: u8,
+        // shock_samples: u8,
+        // quiet_samples: u8,
+        // duration_samples: u8,
+        interrupt_route: InterruptRoute,
         latched_irq: bool,
     ) {
         self.enable_irqs(latched_irq);
 
-        self.tap.recognition_mode = tap_recognition_mode;
-        self.tap.direction_enable = tap_direction_enable;
+        self.tap.recognition_mode = recognition_mode;
+        self.tap.direction_enable = direction_enable;
+        // self.tap.threshold = threshold;
+        // self.tap.shock_samples = shock_samples;
+        // self.tap.quiet_samples = quiet_samples;
+        // self.tap.duration_samples = duration_samples;
+        self.tap.interrupt_route = interrupt_route;
 
         self.update_registers();
     }
@@ -175,7 +186,7 @@ impl IrqSettings {
         (
             self.registers.md1_cfg.free_fall_event,
             self.registers.md2_cfg.free_fall_event,
-        ) = match self.tap.interrupt_route {
+        ) = match self.free_fall.interrupt_route {
             InterruptRoute::None => (0.into(), 0.into()),
             InterruptRoute::Int1 => (1.into(), 0.into()),
             InterruptRoute::Int2 => (0.into(), 1.into()),
@@ -191,7 +202,7 @@ impl IrqSettings {
         (
             self.registers.md1_cfg.wake_up_event,
             self.registers.md2_cfg.wake_up_event,
-        ) = match self.tap.interrupt_route {
+        ) = match self.wake_up.interrupt_route {
             InterruptRoute::None => (0.into(), 0.into()),
             InterruptRoute::Int1 => (1.into(), 0.into()),
             InterruptRoute::Int2 => (0.into(), 1.into()),
@@ -203,21 +214,31 @@ impl IrqSettings {
     fn update_tap_registers(&mut self) {
         match self.tap.recognition_mode {
             TapRecognitionMode::None | TapRecognitionMode::Single => {
-                self.registers.wake_up_ths.single_and_double_tap_enabled = 0.into()
+                self.registers.wake_up_ths.single_double_tap_enabled = 0.into()
             }
             TapRecognitionMode::Double | TapRecognitionMode::Both => {
-                self.registers.wake_up_ths.single_and_double_tap_enabled = 1.into()
+                self.registers.wake_up_ths.single_double_tap_enabled = 1.into()
             }
         }
         match self.tap.recognition_mode {
-            TapRecognitionMode::None => (),
-            TapRecognitionMode::Single => self.update_single_tap_registers(),
-            TapRecognitionMode::Double => self.update_double_tap_registers(),
+            TapRecognitionMode::None => {
+                self.registers.tap_cfg.enable_basic_interrupts = false.into()
+            }
+            TapRecognitionMode::Single => {
+                self.registers.tap_cfg.enable_basic_interrupts = true.into();
+                self.update_single_tap_registers()
+            }
+            TapRecognitionMode::Double => {
+                self.registers.tap_cfg.enable_basic_interrupts = true.into();
+                self.update_double_tap_registers()
+            }
             TapRecognitionMode::Both => {
+                self.registers.tap_cfg.enable_basic_interrupts = true.into();
                 self.update_single_tap_registers();
                 self.update_double_tap_registers();
             }
         };
+        self.registers.tap_cfg.enable_basic_interrupts = 1.into();
         self.registers.tap_cfg.enable_x_direction_tap_recognition =
             self.tap.direction_enable.x.into();
         self.registers.tap_cfg.enable_y_direction_tap_recognition =

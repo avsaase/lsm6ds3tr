@@ -1,6 +1,6 @@
 default:
   # https://gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker
-  image: registry.gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker:128709a268033013d4ba11d6d0ab95fc
+  image: registry.gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker:9d1f2e8b31e941493aa16a5f46802af7
 
 stages:
   - check
@@ -18,7 +18,6 @@ doc:
   dependencies: []
   script:
     - ci/jobs/doc
-  allow_failure: true
 
 build:
   stage: build

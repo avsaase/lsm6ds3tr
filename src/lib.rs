@@ -8,16 +8,17 @@ mod registers;
 mod settings;
 
 use consts::*;
-use data::XYZ;
+pub use data::XYZ;
 use interface::Interface;
+pub use registers::{AccelSampleRate, AccelScale};
 use registers::{
     Ctrl3C, GyroSampleRate, GyroScale, RegisterAddress, RegisterBits, RegisterConfig,
     RegisterValue, TapSrc, WakeUpSrc,
 };
-
-pub use registers::{AccelSampleRate, AccelScale};
-
-pub use settings::{AccelSettings, GyroSettings, IrqSettings, LsmSettings};
+pub use settings::{
+    irq::{InterruptRoute, TapIrqSettings, TapRecognitionMode},
+    AccelSettings, GyroSettings, IrqSettings, LsmSettings,
+};
 
 extern crate alloc;
 use alloc::vec::Vec;
@@ -157,7 +158,14 @@ where
         // TODO add FUNC_SRC2 reading
         wake_up_src = self.read_register(wake_up_src.address())?.into();
         tap_src = self.read_register(tap_src.address())?.into();
-        Ok([wake_up_src.get_irq_sources(), tap_src.get_irq_sources()].concat())
+        let mut irq_sources = Vec::new();
+        for source in wake_up_src.get_irq_sources() {
+            irq_sources.push(source.clone());
+        }
+        for source in tap_src.get_irq_sources() {
+            irq_sources.push(source.clone());
+        }
+        Ok(irq_sources)
     }
 
     fn read_sensor_raw(&mut self, addr: u8) -> Result<XYZ<i16>, I::Error> {
@@ -194,7 +202,8 @@ where
 }
 
 /// Interrupt sources
-#[derive(Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[derive(Clone, Debug)]
 pub enum IrqSource {
     FreeFall,
     Sleep,
@@ -209,3 +218,5 @@ pub enum IrqSource {
     TapOnY,
     TapOnZ,
 }
+
+pub struct IrqSources(pub Vec<IrqSource>);
