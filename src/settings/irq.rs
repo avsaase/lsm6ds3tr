@@ -1,8 +1,8 @@
 use crate::{
     data::XYZ,
     registers::{
-        FreeFall, FreeFallThreshold, Int1Ctrl, Int2Ctrl, IntDur2, Md1Cfg, Md2Cfg, RegisterConfig,
-        TapCfg, TapThs6d, WakeUpDur, WakeUpThs,
+        FreeFall, FreeFallThreshold, InactivityGyroMode, Int1Ctrl, Int2Ctrl, IntDur2, Md1Cfg,
+        Md2Cfg, RegisterConfig, TapCfg, TapThs6d, WakeUpDur, WakeUpThs,
     },
 };
 
@@ -56,9 +56,11 @@ pub struct TapIrqSettings {
 }
 
 #[derive(Default)]
-pub struct ActivityIrqSettings {
+pub struct InactivityIrqSettings {
     pub interrupt_route: InterruptRoute,
-    // TODO
+    pub inactivity_gyro_mode: InactivityGyroMode,
+    pub threshold: u8,
+    pub sleep_duration: u8,
 }
 
 /// Interrupt settings
@@ -68,7 +70,7 @@ pub struct IrqSettings {
     pub wake_up: WakeUpIrqSettings,
     pub orientation_detection: OrientationDetectionIrqSettings,
     pub tap: TapIrqSettings,
-    pub activity: ActivityIrqSettings,
+    pub inactivity: InactivityIrqSettings,
     registers: IrqRegisters,
 }
 
@@ -145,6 +147,25 @@ impl IrqSettings {
         self.update_registers();
     }
 
+    /// Enables Activity/Inactivity interrupt
+    pub fn enable_inactivity_irq(
+        &mut self,
+        inactivity_gyro_mode: InactivityGyroMode,
+        threshold: u8,
+        duration_samples: u8,
+        interrupt_route: InterruptRoute,
+        latched_irq: bool,
+    ) {
+        self.enable_irqs(latched_irq);
+
+        self.inactivity.inactivity_gyro_mode = inactivity_gyro_mode;
+        self.inactivity.threshold = threshold;
+        self.inactivity.sleep_duration = duration_samples;
+        self.inactivity.interrupt_route = interrupt_route;
+
+        self.update_registers();
+    }
+
     /// Enables basic interrupts
     pub fn enable_irqs(&mut self, latched_irq: bool) {
         self.registers.tap_cfg.enable_basic_interrupts = 1.into();
@@ -180,6 +201,7 @@ impl IrqSettings {
         self.update_free_fall_registers();
         self.update_wake_up_registers();
         self.update_tap_registers();
+        self.update_inactivity_registers();
     }
 
     fn update_free_fall_registers(&mut self) {
@@ -273,5 +295,20 @@ impl IrqSettings {
             InterruptRoute::Int2 => (0.into(), 1.into()),
             InterruptRoute::Both => (1.into(), 1.into()),
         };
+    }
+
+    fn update_inactivity_registers(&mut self) {
+        (
+            self.registers.md1_cfg.inactivity_event,
+            self.registers.md2_cfg.inactivity_event,
+        ) = match self.inactivity.interrupt_route {
+            InterruptRoute::None => (0.into(), 0.into()),
+            InterruptRoute::Int1 => (1.into(), 0.into()),
+            InterruptRoute::Int2 => (0.into(), 1.into()),
+            InterruptRoute::Both => (1.into(), 1.into()),
+        };
+        self.registers.wake_up_ths.wake_up_threshold = self.inactivity.threshold.into();
+        self.registers.wake_up_dur.sleep_duration_event = self.inactivity.sleep_duration.into();
+        self.registers.tap_cfg.enable_inactivity_function = self.inactivity.inactivity_gyro_mode;
     }
 }

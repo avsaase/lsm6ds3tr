@@ -13,7 +13,7 @@ pub struct TapCfg {
     /// 01: sets accelerometer ODR to 12.5 Hz (low-power mode), gyro does not change;
     /// 10: sets accelerometer ODR to 12.5 Hz (low-power mode), gyro to sleep mode;
     /// 11: sets accelerometer ODR to 12.5 Hz (low-power mode), gyro to power-down mode)
-    pub enable_inactivity_function: InactivityFunctionMode,
+    pub enable_inactivity_function: InactivityGyroMode,
     /// HPF or SLOPE filter selection on wake-up and Activity/Inactivity functions. Refer to Figure 8. Default value: 0
     /// (0: SLOPE filter applied; 1: HPF applied)
     pub slope_fds: FilterSelected,
@@ -56,7 +56,7 @@ impl TapCfg {
 
 #[repr(u8)]
 #[derive(Default, Clone, Copy)]
-pub enum InactivityFunctionMode {
+pub enum InactivityGyroMode {
     #[default]
     Disabled = 0b00,
     AccelLowPowerGyroUnchanged = 0b01,
@@ -64,7 +64,7 @@ pub enum InactivityFunctionMode {
     AccelLowPowerGyroPowerDown = 0b11,
 }
 
-impl RegisterValue for InactivityFunctionMode {
+impl RegisterValue for InactivityGyroMode {
     fn shifted(&self) -> u8 {
         (*self as u8) << 5
     }

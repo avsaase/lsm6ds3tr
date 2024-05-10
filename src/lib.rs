@@ -10,7 +10,7 @@ mod settings;
 use consts::*;
 pub use data::XYZ;
 use interface::Interface;
-pub use registers::{AccelSampleRate, AccelScale};
+pub use registers::{AccelSampleRate, AccelScale, InactivityGyroMode};
 use registers::{
     Ctrl3C, GyroSampleRate, GyroScale, RegisterAddress, RegisterBits, RegisterConfig,
     RegisterValue, TapSrc, WakeUpSrc,
@@ -160,10 +160,10 @@ where
         tap_src = self.read_register(tap_src.address())?.into();
         let mut irq_sources = Vec::new();
         for source in wake_up_src.get_irq_sources() {
-            irq_sources.push(source.clone());
+            irq_sources.push(source);
         }
         for source in tap_src.get_irq_sources() {
-            irq_sources.push(source.clone());
+            irq_sources.push(source);
         }
         Ok(irq_sources)
     }
@@ -203,7 +203,7 @@ where
 
 /// Interrupt sources
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum IrqSource {
     FreeFall,
     Sleep,

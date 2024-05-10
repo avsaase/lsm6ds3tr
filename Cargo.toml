@@ -1,6 +1,6 @@
 [package]
 name = "lsm6ds3tr"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 description = "LSM6DS3TR 6-axis (DOF) IMU accelerometer & gyroscope rust driver library"
 authors = ["Marcin Czekajło <mtczekajlo@gmail.com>"]

@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod addresses;
 pub mod ctrl1_xl;
 pub mod ctrl2_g;
