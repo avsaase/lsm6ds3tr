@@ -1,6 +1,6 @@
 default:
   # https://gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker
-  image: registry.gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker:9d1f2e8b31e941493aa16a5f46802af7
+  image: registry.gitlab.com/mtczekajlo/lsm6ds3tr-rs-docker:f3598e64faee1b7e66b2bb792fce3290
 
 stages:
   - check
