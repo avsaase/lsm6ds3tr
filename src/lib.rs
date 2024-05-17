@@ -8,6 +8,8 @@ pub mod interface;
 pub mod registers;
 mod settings;
 
+use heapless::Vec;
+
 use consts::*;
 pub use data::XYZ;
 use interface::Interface;
@@ -20,9 +22,6 @@ pub use settings::{
     irq::{InterruptRoute, TapIrqSettings, TapRecognitionMode},
     AccelSettings, GyroSettings, IrqSettings, LsmSettings,
 };
-
-extern crate alloc;
-use alloc::vec::Vec;
 
 /// Device driver
 pub struct LSM6DS3TR<I>
@@ -162,7 +161,7 @@ where
     }
 
     /// Returns last interrupt sources
-    pub async fn read_interrupt_sources(&mut self) -> Result<Vec<IrqSource>, I::Error> {
+    pub async fn read_interrupt_sources(&mut self) -> Result<Vec<IrqSource, 2>, I::Error> {
         let mut wake_up_src = WakeUpSrc::default();
         let mut tap_src = TapSrc::default();
         // TODO add FUNC_SRC1 reading
@@ -171,10 +170,10 @@ where
         tap_src = self.read_register(tap_src.address()).await?.into();
         let mut irq_sources = Vec::new();
         for source in wake_up_src.get_irq_sources() {
-            irq_sources.push(source);
+            irq_sources.push(source).unwrap();
         }
         for source in tap_src.get_irq_sources() {
-            irq_sources.push(source);
+            irq_sources.push(source).unwrap();
         }
         Ok(irq_sources)
     }
@@ -233,5 +232,3 @@ pub enum IrqSource {
     TapOnY,
     TapOnZ,
 }
-
-pub struct IrqSources(pub Vec<IrqSource>);

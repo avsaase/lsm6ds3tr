@@ -1,9 +1,9 @@
 //! Tap source register (r).
+//!
+
+use heapless::Vec;
 
 use crate::{IrqSource, RegisterAddress, RegisterBits};
-
-extern crate alloc;
-use alloc::vec::Vec;
 
 /// Tap source register (r).
 #[derive(Default)]
@@ -37,25 +37,25 @@ impl TapSrc {
         RegisterAddress::TAP_SRC.address()
     }
 
-    pub fn get_irq_sources(&self) -> Vec<IrqSource> {
-        let mut v: Vec<IrqSource> = Default::default();
+    pub fn get_irq_sources(&self) -> Vec<IrqSource, 6> {
+        let mut v: Vec<IrqSource, 6> = Default::default();
         if self.tap_event.value() != 0 {
-            v.push(IrqSource::Tap);
+            v.push(IrqSource::Tap).unwrap();
         }
         if self.single_tap_event.value() != 0 {
-            v.push(IrqSource::SingleTap);
+            v.push(IrqSource::SingleTap).unwrap();
         }
         if self.double_tap_event.value() != 0 {
-            v.push(IrqSource::DoubleTap);
+            v.push(IrqSource::DoubleTap).unwrap();
         }
         if self.tap_x_axis.value() != 0 {
-            v.push(IrqSource::TapOnX);
+            v.push(IrqSource::TapOnX).unwrap();
         }
         if self.tap_y_axis.value() != 0 {
-            v.push(IrqSource::TapOnY);
+            v.push(IrqSource::TapOnY).unwrap();
         }
         if self.tap_z_axis.value() != 0 {
-            v.push(IrqSource::TapOnZ);
+            v.push(IrqSource::TapOnZ).unwrap();
         }
         v
     }

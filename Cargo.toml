@@ -12,6 +12,7 @@ license = "MIT"
 [dependencies]
 defmt = { version = "0.3.6", optional = true }
 embedded-hal-async = "1.0.0"
+heapless = "0.8.0"
 
 [features]
 default = []

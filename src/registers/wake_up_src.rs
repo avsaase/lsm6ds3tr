@@ -1,9 +1,9 @@
 //! Wake up interrupt source register (r).
+//!
+
+use heapless::Vec;
 
 use crate::{IrqSource, RegisterAddress, RegisterBits};
-
-extern crate alloc;
-use alloc::vec::Vec;
 
 /// Wake up interrupt source register (r).
 #[derive(Default)]
@@ -33,25 +33,25 @@ impl WakeUpSrc {
         RegisterAddress::WAKE_UP_SRC.address()
     }
 
-    pub fn get_irq_sources(&self) -> Vec<IrqSource> {
+    pub fn get_irq_sources(&self) -> Vec<IrqSource, 6> {
         let mut v = Vec::new();
         if self.free_fall_event.value() != 0 {
-            v.push(IrqSource::FreeFall);
+            v.push(IrqSource::FreeFall).unwrap();
         }
         if self.sleep_event.value() != 0 {
-            v.push(IrqSource::Sleep);
+            v.push(IrqSource::Sleep).unwrap();
         }
         if self.wake_up_event.value() != 0 {
-            v.push(IrqSource::WakeUp);
+            v.push(IrqSource::WakeUp).unwrap();
         }
         if self.wake_up_event_x.value() != 0 {
-            v.push(IrqSource::WakeUpOnX);
+            v.push(IrqSource::WakeUpOnX).unwrap();
         }
         if self.wake_up_event_y.value() != 0 {
-            v.push(IrqSource::WakeUpOnY);
+            v.push(IrqSource::WakeUpOnY).unwrap();
         }
         if self.wake_up_event_z.value() != 0 {
-            v.push(IrqSource::WakeUpOnZ);
+            v.push(IrqSource::WakeUpOnZ).unwrap();
         }
         v
     }
