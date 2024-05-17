@@ -1,5 +1,7 @@
 use embedded_hal_async::spi::SpiDevice;
 
+use super::Interface;
+
 const SPI_READ: u8 = 0x80;
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -14,20 +16,24 @@ pub struct SpiInterface<SPI> {
     spi: SPI,
 }
 
-impl<SPI> SpiInterface<SPI>
-where
-    SPI: SpiDevice,
-{
+impl<SPI> SpiInterface<SPI> {
     pub fn new(spi: SPI) -> Self {
         Self { spi }
     }
+}
 
-    async fn write(&mut self, addr: u8, value: u8) -> Result<(), SPI::Error> {
+impl<SPI> Interface for SpiInterface<SPI>
+where
+    SPI: SpiDevice,
+{
+    type Error = SPI::Error;
+
+    async fn write(&mut self, addr: u8, value: u8) -> Result<(), Self::Error> {
         let bytes = [addr, value];
         self.spi.write(&bytes).await
     }
 
-    async fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), SPI::Error> {
+    async fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
         self.spi.write(&[SPI_READ | addr]).await?;
         self.spi.read(buffer).await
     }

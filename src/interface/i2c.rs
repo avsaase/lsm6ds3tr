@@ -1,5 +1,7 @@
 use embedded_hal_async::i2c::I2c;
 
+use super::Interface;
+
 const I2C_ADDRESS: u8 = 0x6A;
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -19,12 +21,14 @@ impl<I2C> I2cInterface<I2C> {
     }
 }
 
-impl<I2C: I2c> I2cInterface<I2C> {
-    async fn write(&mut self, addr: u8, value: u8) -> Result<(), I2C::Error> {
+impl<I2C: I2c> Interface for I2cInterface<I2C> {
+    type Error = I2C::Error;
+
+    async fn write(&mut self, addr: u8, value: u8) -> Result<(), Self::Error> {
         self.i2c.write(I2C_ADDRESS, &[addr, value]).await
     }
 
-    async fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), I2C::Error> {
+    async fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
         self.i2c.write_read(I2C_ADDRESS, &[addr], buffer).await
     }
 }

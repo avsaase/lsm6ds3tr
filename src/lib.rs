@@ -1,5 +1,6 @@
 #![cfg_attr(not(test), no_std)]
 #![allow(dead_code)]
+#![allow(async_fn_in_trait)]
 
 mod consts;
 mod data;
