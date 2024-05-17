@@ -1,4 +1,4 @@
-use embedded_hal_async::spi::SpiDevice;
+use embedded_hal_async::spi::{Operation, SpiDevice};
 
 use super::Interface;
 
@@ -34,7 +34,12 @@ where
     }
 
     async fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
-        self.spi.write(&[SPI_READ | addr]).await?;
-        self.spi.read(buffer).await
+        self.spi
+            .transaction(&mut [
+                Operation::Write(&[0b1000_0000 | addr]),
+                Operation::Read(buffer),
+            ])
+            .await?;
+        Ok(())
     }
 }
