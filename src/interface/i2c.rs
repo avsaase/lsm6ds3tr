@@ -1,4 +1,4 @@
-use embedded_hal::i2c::I2c;
+use embedded_hal_async::i2c::I2c;
 
 const I2C_ADDRESS: u8 = 0x6A;
 
@@ -20,11 +20,11 @@ impl<I2C> I2cInterface<I2C> {
 }
 
 impl<I2C: I2c> I2cInterface<I2C> {
-    fn write(&mut self, addr: u8, value: u8) -> Result<(), I2C::Error> {
-        self.i2c.write(I2C_ADDRESS, &[addr, value])
+    async fn write(&mut self, addr: u8, value: u8) -> Result<(), I2C::Error> {
+        self.i2c.write(I2C_ADDRESS, &[addr, value]).await
     }
 
-    fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), I2C::Error> {
-        self.i2c.write_read(I2C_ADDRESS, &[addr], buffer)
+    async fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), I2C::Error> {
+        self.i2c.write_read(I2C_ADDRESS, &[addr], buffer).await
     }
 }
