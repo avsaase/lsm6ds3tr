@@ -1,5 +1,4 @@
 //! Tap source register (r).
-//!
 
 use heapless::Vec;
 

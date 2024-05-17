@@ -1,5 +1,4 @@
 //! Wake up interrupt source register (r).
-//!
 
 use heapless::Vec;
 
