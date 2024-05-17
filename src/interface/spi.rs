@@ -2,15 +2,6 @@ use embedded_hal_async::spi::{Operation, SpiDevice};
 
 use super::Interface;
 
-const SPI_READ: u8 = 0x80;
-
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-#[derive(Debug)]
-pub enum InterfaceE<CommE, PinE> {
-    Comm(CommE),
-    Pin(PinE),
-}
-
 /// SPI communication interface
 pub struct SpiInterface<SPI> {
     spi: SPI,
