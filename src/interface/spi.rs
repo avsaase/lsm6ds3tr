@@ -1,4 +1,4 @@
-use embedded_hal_async::spi::{Operation, SpiDevice};
+use embedded_hal::spi::{Operation, SpiDevice};
 
 use super::Interface;
 
@@ -19,18 +19,16 @@ where
 {
     type Error = SPI::Error;
 
-    async fn write(&mut self, addr: u8, value: u8) -> Result<(), Self::Error> {
+    fn write(&mut self, addr: u8, value: u8) -> Result<(), Self::Error> {
         let bytes = [addr, value];
-        self.spi.write(&bytes).await
+        self.spi.write(&bytes)
     }
 
-    async fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
-        self.spi
-            .transaction(&mut [
-                Operation::Write(&[0b1000_0000 | addr]),
-                Operation::Read(buffer),
-            ])
-            .await?;
+    fn read(&mut self, addr: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
+        self.spi.transaction(&mut [
+            Operation::Write(&[0b1000_0000 | addr]),
+            Operation::Read(buffer),
+        ])?;
         Ok(())
     }
 }
